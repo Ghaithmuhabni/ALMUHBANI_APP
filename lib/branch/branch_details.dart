@@ -1,0 +1,306 @@
+import 'package:flutter/material.dart';
+// import 'package:url_launcher/url_launcher.dart';
+
+class BranchDetailsPage extends StatelessWidget {
+  static const String routeName = '/branch-details';
+
+  // بيانات الفرع
+  final Map<String, dynamic> branch;
+
+  const BranchDetailsPage({required this.branch, Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Directionality(
+      textDirection: TextDirection.rtl, // محاذاة النص لليمين
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(
+            branch['name'],
+            style: const TextStyle(
+              fontFamily: 'Amiri',
+              fontSize: 20,
+              color: Colors.white,
+            ),
+          ),
+          backgroundColor: const Color(0xFF8B0000),
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () => Navigator.pop(context),
+          ),
+        ),
+
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // صورة الفرع
+              Container(
+                width: double.infinity,
+                height: 200,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  image: DecorationImage(
+                    image: AssetImage(branch['image']),
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // اسم المدير
+              Text(
+                'مدير الفرع: ${branch['manager']}',
+                style: const TextStyle(
+                  fontFamily: 'Amiri',
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF8B0000),
+                ),
+              ),
+              const SizedBox(height: 8),
+
+              // العنوان
+              Row(
+                children: [
+                  const Icon(
+                    Icons.location_on,
+                    color: Color(0xFF8B0000),
+                    size: 20,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'المنطقة: حمص - ${branch['region']}  ',
+                      style: TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 14,
+                        color: Colors.grey[700],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+
+              // أوقات العمل
+              Row(
+                children: [
+                  const Icon(
+                    Icons.access_time,
+                    color: Color(0xFF8B0000),
+                    size: 20,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'مفتوح من 7:00 صباحاً إلى 10:00 مساءً',
+                    style: TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 14,
+                      color: Colors.grey[700],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+
+              // خريطة
+              Container(
+                width: double.infinity,
+                height: 150,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  color: Colors.grey[200],
+                  border: Border.all(color: const Color(0xFFFFD700), width: 2),
+                ),
+                child: Stack(
+                  children: [
+                    Center(
+                      child: Text(
+                        'خريطة الموقع\n(يتم دمجها لاحقاً مع Google Maps)',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontFamily: 'Poppins',
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      bottom: 8,
+                      right: 8,
+                      child: ElevatedButton.icon(
+                        onPressed: () {},
+                        icon: const Icon(
+                          Icons.directions,
+                          size: 16,
+                          color: Colors.white,
+                        ),
+                        label: const Text(
+                          'الاتجاهات',
+                          style: TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: 12,
+                            color: Colors.white,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF8B0000),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              // قائمة الطعام
+              const Text(
+                'قائمة الطعام',
+                style: TextStyle(
+                  fontFamily: 'Amiri',
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF8B0000),
+                ),
+              ),
+              const SizedBox(height: 12),
+              _buildMenuItems(),
+
+              const SizedBox(height: 80), // مساحة لعدم تغطية المحتوى بالأزرار
+            ],
+          ),
+        ),
+
+        // الأزرار في أسفل الصفحة
+        bottomSheet: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            border: Border(top: BorderSide(color: Color(0xFFFFD700), width: 2)),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    // _makePhoneCall('tel:${branch['phone']}');
+                  },
+                  icon: const Icon(
+                    Icons.phone,
+                    size: 18,
+                    color: Color(0xFFFFFFFF),
+                  ),
+                  label: const Text(
+                    'اتصال',
+                    style: TextStyle(
+                      fontFamily: 'Poppins',
+                      color: Color(0xFFFFFFFF),
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF8B0000),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    // _sendWhatsApp('963912345678', 'مرحباً، أريد طلب بعض الحلويات من فرع ${branch['name']}');
+                  },
+                  icon: const Icon(
+                    Icons.message,
+                    size: 18,
+                    color: Color(0xFFFFFFFF),
+                  ),
+                  label: const Text(
+                    'واتساب',
+                    style: TextStyle(
+                      fontFamily: 'Poppins',
+                      color: Color(0xFFFFFFFF),
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF8B0000),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // قائمة الطعام
+  Widget _buildMenuItems() {
+    final List<Map<String, dynamic>> menu = [
+      {'name': 'معمول بالفستق', 'price': '5,000', 'image': 'images/mamoul.jpg'},
+      {'name': 'بقلاوة', 'price': '4,500', 'image': 'images/mamoul.jpg'},
+      {'name': 'كنافة بالجبنة', 'price': '6,000', 'image': 'images/mamoul.jpg'},
+      {'name': 'سبيكة السحالي', 'price': '7,000', 'image': 'images/mamoul.jpg'},
+    ];
+
+    return Column(
+      children: menu.map((item) {
+        return Card(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          elevation: 2,
+          child: Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Row(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Image.asset(
+                    item['image'],
+                    width: 60,
+                    height: 60,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Text(
+                    item['name'],
+                    style: const TextStyle(
+                      fontFamily: 'Amiri',
+                      fontSize: 16,
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
+                Text(
+                  '${item['price']} ل.س',
+                  style: const TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF8B0000),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
+}
