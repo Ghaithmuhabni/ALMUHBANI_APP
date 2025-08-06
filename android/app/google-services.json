@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "571305809887",
+    "project_id": "almuhbani-e47e7",
+    "storage_bucket": "almuhbani-e47e7.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:571305809887:android:546a1a926ee1ce8b8e966a",
+        "android_client_info": {
+          "package_name": "com.android.application"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBgJTCyAQX63UyAnDR30gUQR2tv_3AA4z4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
