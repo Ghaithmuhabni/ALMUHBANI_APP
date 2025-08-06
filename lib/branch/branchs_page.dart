@@ -17,12 +17,18 @@ class Branch {
   });
 }
 
-class BranchesPage extends StatelessWidget {
-  BranchesPage({Key? key}) : super(key: key);
+class BranchesPage extends StatefulWidget {
+  const BranchesPage({Key? key}) : super(key: key);
+
+  @override
+  State<BranchesPage> createState() => _BranchesPageState();
+}
+
+class _BranchesPageState extends State<BranchesPage> {
   final List<Branch> branches = [
     Branch(
       name: "فرع الغوطة",
-      manager: "أبو بسام",
+      manager: "ابو بسام",
       imageUrl: "images/logo.jpg",
       region: "الغوطة جانب رينبو الغوطة",
       phone: "0934567890",
@@ -50,7 +56,7 @@ class BranchesPage extends StatelessWidget {
     ),
     Branch(
       name: "فرع الغوطة",
-      manager: "أبو بسام",
+      manager: "ابو بسام",
       imageUrl: "images/logo.jpg",
       region: "الغوطة جانب رينبو الغوطة",
       phone: "0934567890",
@@ -63,6 +69,28 @@ class BranchesPage extends StatelessWidget {
       phone: "0934567891",
     ),
   ];
+
+  // قائمة مؤقتة تعرض النتائج بعد التصفية
+  late List<Branch> _filteredBranches;
+
+  @override
+  void initState() {
+    super.initState();
+    _filteredBranches = branches; // في البداية، اعرض كل الفروع
+  }
+
+  // دالة لتصفية الفروع حسب اسم الفرع أو المدير
+  void _filterBranches(String query) {
+    setState(() {
+      if (query.isEmpty) {
+        _filteredBranches = branches;
+      } else {
+        _filteredBranches = branches.where((branch) {
+          return branch.name.contains(query) || branch.manager.contains(query);
+        }).toList();
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -80,6 +108,44 @@ class BranchesPage extends StatelessWidget {
             ),
           ),
 
+          // شريط البحث
+          Directionality(
+            textDirection: TextDirection.rtl, // محاذاة النص لليمين
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: const Color(0xFFFFD700), width: 2),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 6,
+                      offset: Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: TextField(
+                  style: TextStyle(color: Colors.black),
+                  decoration: InputDecoration(
+                    hintText: 'ابحث عن فرع أو مدير...',
+                    hintStyle: TextStyle(color: Colors.grey[900]),
+                    prefixIcon: Icon(Icons.search, color: Color(0xFFFFD700)),
+                    border: InputBorder.none,
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 14,
+                    ),
+                  ),
+                  onChanged: (value) {
+                    _filterBranches(value);
+                  },
+                ),
+              ),
+            ),
+          ),
+
           // القائمة
           Expanded(
             child: Container(
@@ -90,86 +156,96 @@ class BranchesPage extends StatelessWidget {
                   topRight: Radius.circular(25),
                 ),
               ),
-              child: ListView.builder(
-                padding: const EdgeInsets.all(12),
-                itemCount: branches.length,
-                itemBuilder: (context, index) {
-                  final branch = branches[index];
-                  return GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => BranchDetailsPage(
-                            branch: {
-                              'name': branch.name,
-                              'manager': branch.manager,
-                              'image': branch.imageUrl,
-                              'region': branch.region,
-                              'phone': branch.phone,
-                            },
-                          ),
-                        ),
-                      );
-                    },
-                    child: Container(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      padding: const EdgeInsets.all(12),
-                      height: 120, // جعل الكرت أكبر
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF8B0000),
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(
-                          color: const Color(0xFFFFD700), // إطار ذهبي
-                          width: 2,
+              child: _filteredBranches.isEmpty
+                  ? Center(
+                      child: Text(
+                        'لا يوجد فروع مطابقة',
+                        style: TextStyle(
+                          fontFamily: 'Amiri',
+                          fontSize: 18,
+                          color: Colors.grey[700],
                         ),
                       ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          // صورة الشعار
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(8),
-                            child: Image.asset(
-                              branch.imageUrl,
-                              width: 95,
-                              height: 95,
-                              fit: BoxFit.cover,
+                    )
+                  : ListView.builder(
+                      padding: const EdgeInsets.all(12),
+                      itemCount: _filteredBranches.length,
+                      itemBuilder: (context, index) {
+                        final branch = _filteredBranches[index];
+                        return GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => BranchDetailsPage(
+                                  branch: {
+                                    'name': branch.name,
+                                    'manager': branch.manager,
+                                    'image': branch.imageUrl,
+                                    'region': branch.region,
+                                    'phone': branch.phone,
+                                  },
+                                ),
+                              ),
+                            );
+                          },
+                          child: Container(
+                            margin: const EdgeInsets.only(bottom: 12),
+                            padding: const EdgeInsets.all(12),
+                            height: 120,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF8B0000),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: const Color(0xFFFFD700),
+                                width: 2,
+                              ),
                             ),
-                          ),
-                          const SizedBox(width: 12),
-
-                          // النصوص على اليمين
-                          Expanded(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment:
-                                  CrossAxisAlignment.end, // محاذاة لليمين
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                Text(
-                                  branch.name,
-                                  style: const TextStyle(
-                                    color: Color(0xFFFFD700), // ذهبي
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
+                                // صورة الشعار
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Image.asset(
+                                    branch.imageUrl,
+                                    width: 95,
+                                    height: 95,
+                                    fit: BoxFit.cover,
                                   ),
                                 ),
-                                Text(
-                                  branch.manager,
-                                  style: const TextStyle(
-                                    color: Color(0xFFFFD700), // ذهبي
-                                    fontSize: 16,
+                                const SizedBox(width: 12),
+
+                                // النصوص على اليمين
+                                Expanded(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: [
+                                      Text(
+                                        branch.name,
+                                        style: const TextStyle(
+                                          color: Color(0xFFFFD700),
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      Text(
+                                        branch.manager,
+                                        style: const TextStyle(
+                                          color: Color(0xFFFFD700),
+                                          fontSize: 16,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ],
                             ),
                           ),
-                        ],
-                      ),
+                        );
+                      },
                     ),
-                  );
-                },
-              ),
             ),
           ),
         ],

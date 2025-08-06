@@ -15,6 +15,7 @@ class BranchDetailsPage extends StatelessWidget {
       textDirection: TextDirection.rtl, // محاذاة النص لليمين
       child: Scaffold(
         appBar: AppBar(
+          centerTitle: true,
           title: Text(
             branch['name'],
             style: const TextStyle(
@@ -76,8 +77,8 @@ class BranchDetailsPage extends StatelessWidget {
                       'المنطقة: حمص - ${branch['region']}  ',
                       style: TextStyle(
                         fontFamily: 'Poppins',
-                        fontSize: 14,
-                        color: Colors.grey[700],
+                        fontSize: 15,
+                        color: Colors.grey[900],
                       ),
                     ),
                   ),
@@ -98,8 +99,8 @@ class BranchDetailsPage extends StatelessWidget {
                     'مفتوح من 7:00 صباحاً إلى 10:00 مساءً',
                     style: TextStyle(
                       fontFamily: 'Poppins',
-                      fontSize: 14,
-                      color: Colors.grey[700],
+                      fontSize: 15,
+                      color: Colors.grey[900],
                     ),
                   ),
                 ],
@@ -160,7 +161,7 @@ class BranchDetailsPage extends StatelessWidget {
 
               // قائمة الطعام
               const Text(
-                'قائمة الطعام',
+                'القائمة  ',
                 style: TextStyle(
                   fontFamily: 'Amiri',
                   fontSize: 18,
