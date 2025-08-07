@@ -259,45 +259,50 @@ class BranchDetailsPage extends StatelessWidget {
 
     return Column(
       children: menu.map((item) {
-        return Card(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+        return Container(
+          margin: const EdgeInsets.symmetric(vertical: 8),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            border: Border.all(color: Color(0xFFFFD700), width: 1.5),
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black12,
+                blurRadius: 4,
+                offset: Offset(0, 2),
+              ),
+            ],
           ),
-          elevation: 2,
-          child: Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Row(
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: Image.asset(
-                    item['image'],
-                    width: 60,
-                    height: 60,
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Text(
-                    item['name'],
-                    style: const TextStyle(
-                      fontFamily: 'Amiri',
-                      fontSize: 16,
-                      color: Colors.black,
-                    ),
-                  ),
-                ),
-                Text(
-                  '${item['price']} ل.س',
-                  style: const TextStyle(
-                    fontFamily: 'Poppins',
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF8B0000),
-                  ),
-                ),
-              ],
+          child: ListTile(
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 8,
+            ),
+            leading: ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Image.asset(
+                item['image'],
+                width: 100,
+                height: 100,
+                fit: BoxFit.cover,
+              ),
+            ),
+            title: Text(
+              item['name'],
+              style: const TextStyle(
+                fontFamily: 'Amiri',
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF8B0000),
+              ),
+            ),
+            subtitle: Text(
+              '${item['price']} ل.س',
+              style: const TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: 14,
+                color: Colors.black87,
+              ),
             ),
           ),
         );

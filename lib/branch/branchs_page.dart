@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/auth/login_page.dart';
 import 'branch_details.dart';
 
 class Branch {
@@ -99,13 +100,20 @@ class _BranchesPageState extends State<BranchesPage> {
       body: Column(
         children: [
           // الشعار الكبير
-          Padding(
-            padding: const EdgeInsets.only(top: 40, bottom: 20),
-            child: Image.asset(
-              'images/logo.jpg',
-              height: 200,
-              fit: BoxFit.contain,
+          InkWell(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 40, bottom: 20),
+              child: Image.asset(
+                'images/logo.jpg',
+                height: 200,
+                fit: BoxFit.contain,
+              ),
             ),
+            onLongPress: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const LoginPage()),
+              ); // الانتقال إلى صفحة تسجيل الدخول عند الضغط المطول
+            },
           ),
 
           // شريط البحث
