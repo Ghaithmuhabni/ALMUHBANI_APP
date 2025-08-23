@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class BranchDetailsPage extends StatelessWidget {
   static const String routeName = '/branch-details';
@@ -7,12 +9,23 @@ class BranchDetailsPage extends StatelessWidget {
 
   const BranchDetailsPage({required this.branch, Key? key}) : super(key: key);
 
+  // دالة لفتح خرائط غوغل
+  Future<void> _openGoogleMaps() async {
+    const url =
+        'https://www.google.com/maps/search/?api=1&query=34.73309996612312,36.703286909408746';
+    if (await canLaunchUrl(Uri.parse(url))) {
+      await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+    } else {
+      throw 'لا يمكن فتح الرابط $url';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Directionality(
-      textDirection: TextDirection.rtl, // محاذاة النص لليمين
+      textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: Color(0xFFE8D5B5),
+        backgroundColor: const Color(0xFFE8D5B5),
         appBar: AppBar(
           centerTitle: true,
           title: Text(
@@ -24,7 +37,7 @@ class BranchDetailsPage extends StatelessWidget {
               fontWeight: FontWeight.bold,
             ),
           ),
-          backgroundColor: const Color(0xFF8B0000), // أحمر غامق
+          backgroundColor: const Color(0xFF8B0000),
           elevation: 0,
           leading: IconButton(
             icon: const Icon(Icons.arrow_back, color: Colors.white),
@@ -32,73 +45,49 @@ class BranchDetailsPage extends StatelessWidget {
           ),
         ),
 
-        body: Container(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // صورة الفرع
-                Container(
-                  width: double.infinity,
-                  height: 225,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    image: DecorationImage(
-                      image: AssetImage(branch['image']),
-                      fit: BoxFit.fill,
-                    ),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // صورة الفرع
+              Container(
+                width: double.infinity,
+                height: 225,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  image: DecorationImage(
+                    image: AssetImage(branch['image']),
+                    fit: BoxFit.fill,
                   ),
                 ),
-                const SizedBox(height: 16),
+              ),
+              const SizedBox(height: 16),
 
-                // اسم المدير
-                Text(
-                  'مدير الفرع: ${branch['manager']}',
-                  style: const TextStyle(
-                    fontFamily: 'Amiri',
-                    fontSize: 17,
-                    fontWeight: FontWeight.bold,
+              // اسم المدير
+              Text(
+                'مدير الفرع: ${branch['manager']}',
+                style: const TextStyle(
+                  fontFamily: 'Amiri',
+                  fontSize: 17,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF8B0000),
+                ),
+              ),
+              const SizedBox(height: 8),
+
+              // العنوان
+              Row(
+                children: [
+                  const Icon(
+                    Icons.location_on,
                     color: Color(0xFF8B0000),
+                    size: 20,
                   ),
-                ),
-                const SizedBox(height: 8),
-
-                // العنوان
-                Row(
-                  children: [
-                    const Icon(
-                      Icons.location_on,
-                      color: Color(0xFF8B0000),
-                      size: 20,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        'المنطقة: حمص - ${branch['region']}  ',
-                        style: TextStyle(
-                          fontFamily: 'Poppins',
-                          fontSize: 16,
-                          color: Colors.grey[900],
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-
-                // أوقات العمل
-                Row(
-                  children: [
-                    const Icon(
-                      Icons.access_time,
-                      color: Color(0xFF8B0000),
-                      size: 20,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      'مفتوح من 8:00 صباحاً إلى 10:00 مساءً',
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'المنطقة: حمص - ${branch['region']}',
                       style: TextStyle(
                         fontFamily: 'Poppins',
                         fontSize: 16,
@@ -106,92 +95,126 @@ class BranchDetailsPage extends StatelessWidget {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+
+              // أوقات العمل
+              Row(
+                children: [
+                  const Icon(
+                    Icons.access_time,
+                    color: Color(0xFF8B0000),
+                    size: 20,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'مفتوح من 8:00 صباحاً إلى 10:00 مساءً',
+                    style: TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 16,
+                      color: Colors.grey[900],
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+
+              // خريطة غوغل
+              Container(
+                width: double.infinity,
+                height: 200,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  color: Colors.white,
+                  border: Border.all(color: const Color(0xFF8B0000), width: 2),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Colors.black26,
+                      blurRadius: 5,
+                      offset: Offset(0, 3),
+                    ),
                   ],
                 ),
-                const SizedBox(height: 24),
-
-                // خريطة
-                Container(
-                  width: double.infinity,
-                  height: 150,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    color: Colors.white,
-                    border: Border.all(
-                      color: const Color(0xFF8B0000),
-                      width: 2,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black26,
-                        blurRadius: 5,
-                        offset: Offset(0, 3),
+                child: Stack(
+                  children: [
+                    // Google Map
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: GoogleMap(
+                        initialCameraPosition: const CameraPosition(
+                          target: LatLng(
+                            34.73309996612312,
+                            36.703286909408746,
+                          ), // الإحداثيات
+                          zoom: 15,
+                        ),
+                        markers: {
+                          const Marker(
+                            markerId: MarkerId("branch"),
+                            position: LatLng(
+                              34.73309996612312,
+                              36.703286909408746,
+                            ),
+                            infoWindow: InfoWindow(title: "فرعنا هنا"),
+                          ),
+                        },
+                        zoomControlsEnabled: false,
+                        myLocationButtonEnabled: false,
                       ),
-                    ],
-                  ),
-                  child: Stack(
-                    children: [
-                      Center(
-                        child: Text(
-                          'خريطة الموقع\n(يتم دمجها لاحقاً مع Google Maps)',
-                          textAlign: TextAlign.center,
+                    ),
+                    Positioned(
+                      bottom: 8,
+                      right: 8,
+                      child: ElevatedButton.icon(
+                        onPressed: _openGoogleMaps,
+                        icon: const Icon(
+                          Icons.directions,
+                          size: 16,
+                          color: Colors.white,
+                        ),
+                        label: const Text(
+                          'الاتجاهات',
                           style: TextStyle(
                             fontFamily: 'Poppins',
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                      ),
-                      Positioned(
-                        bottom: 8,
-                        right: 8,
-                        child: ElevatedButton.icon(
-                          onPressed: () {},
-                          icon: const Icon(
-                            Icons.directions,
-                            size: 16,
+                            fontSize: 12,
                             color: Colors.white,
                           ),
-                          label: const Text(
-                            'الاتجاهات',
-                            style: TextStyle(
-                              fontFamily: 'Poppins',
-                              fontSize: 12,
-                              color: Colors.white,
-                            ),
-                          ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF8B0000),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF8B0000),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
                           ),
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 24),
+              ),
+              const SizedBox(height: 24),
 
-                // قائمة الطعام
-                const Text(
-                  'القائمة',
-                  style: TextStyle(
-                    fontFamily: 'Amiri',
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF8B0000),
-                  ),
+              // قائمة الطعام
+              const Text(
+                'القائمة',
+                style: TextStyle(
+                  fontFamily: 'Amiri',
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF8B0000),
                 ),
-                const SizedBox(height: 12),
-                _buildMenuItems(),
+              ),
+              const SizedBox(height: 12),
+              _buildMenuItems(),
 
-                const SizedBox(height: 80),
-              ],
-            ),
+              const SizedBox(height: 80),
+            ],
           ),
         ),
 
-        // الأزرار في أسفل الصفحة
+        // الأزرار في أسفل الصفحة (بقيت كما هي)
         bottomSheet: Container(
           padding: const EdgeInsets.all(12),
           decoration: const BoxDecoration(
@@ -271,7 +294,7 @@ class BranchDetailsPage extends StatelessWidget {
             color: Colors.white,
             border: Border.all(color: Color(0xFF8B0000), width: 1.5),
             borderRadius: BorderRadius.circular(16),
-            boxShadow: [
+            boxShadow: const [
               BoxShadow(
                 color: Colors.black12,
                 blurRadius: 4,
