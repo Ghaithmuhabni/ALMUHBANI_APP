@@ -37,7 +37,7 @@ class _BranchesPageState extends State<BranchesPage> {
       name: "فرع الغوطة 2",
       manager: "أبو بسام",
       imageUrl: "images/logo1.png",
-      region: "  مقابل مدرسة غرناطة بعد الفرع الاول ب 200 متر",
+      region: "مقابل مدرسة غرناطة بعد الفرع الاول ب 200 متر",
       phone: "0934567891",
     ),
   ];

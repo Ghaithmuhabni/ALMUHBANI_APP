@@ -41,14 +41,13 @@ class BranchDetailsPage extends StatelessWidget {
                 // صورة الفرع
                 Container(
                   width: double.infinity,
-                  height: 200,
+                  height: 225,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(12),
                     image: DecorationImage(
                       image: AssetImage(branch['image']),
                       fit: BoxFit.fill,
                     ),
-                    // border: Border.all(color: Color(0xFFFFD700), width: 2),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -99,7 +98,7 @@ class BranchDetailsPage extends StatelessWidget {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      'مفتوح من 7:00 صباحاً إلى 10:00 مساءً',
+                      'مفتوح من 8:00 صباحاً إلى 10:00 مساءً',
                       style: TextStyle(
                         fontFamily: 'Poppins',
                         fontSize: 16,
