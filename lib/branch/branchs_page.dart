@@ -52,8 +52,8 @@ class BranchesPage extends StatelessWidget {
             padding: const EdgeInsets.only(top: 40, bottom: 20),
             child: Image.asset(
               'images/logo1.png',
-              height: 150,
-              fit: BoxFit.contain,
+              height: 200,
+              fit: BoxFit.fitHeight,
             ),
           ),
 
@@ -116,14 +116,11 @@ class BranchesPage extends StatelessWidget {
 
   Widget _buildBranchCard(Branch branch, BuildContext context) {
     return Card(
-      elevation: 4,
+      elevation: 2,
       margin: const EdgeInsets.only(bottom: 16),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(15),
-        side: const BorderSide(
-          color: Color(0xFF8B0000),
-          width: 1.5,
-        ),
+        side: const BorderSide(color: Color(0xFF8B0000), width: 1.5),
       ),
       child: InkWell(
         onTap: () {
@@ -146,7 +143,7 @@ class BranchesPage extends StatelessWidget {
         borderRadius: BorderRadius.circular(15),
         child: Container(
           padding: const EdgeInsets.all(12),
-          height: 120,
+          height: 150,
           decoration: BoxDecoration(
             color: const Color(0xFFE8D5B5),
             borderRadius: BorderRadius.circular(15),
@@ -156,8 +153,8 @@ class BranchesPage extends StatelessWidget {
             children: [
               // صورة الشعار
               Container(
-                width: 95,
-                height: 95,
+                width: 110,
+                height: 110,
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(8),
                   child: Image.asset(
@@ -187,7 +184,7 @@ class BranchesPage extends StatelessWidget {
                       branch.name,
                       style: const TextStyle(
                         color: Color(0xFF8B0000),
-                        fontSize: 20,
+                        fontSize: 22,
                         fontWeight: FontWeight.bold,
                         fontFamily: 'Amiri',
                       ),
@@ -196,10 +193,10 @@ class BranchesPage extends StatelessWidget {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      "مدير الفرع: ${branch.manager}",
+                      "بإدارة : ${branch.manager}",
                       style: const TextStyle(
                         color: Color(0xFF8B0000),
-                        fontSize: 16,
+                        fontSize: 18,
                         fontFamily: 'Amiri',
                       ),
                       textAlign: TextAlign.right,
@@ -210,12 +207,12 @@ class BranchesPage extends StatelessWidget {
                       branch.region,
                       style: TextStyle(
                         color: const Color(0xFF8B0000).withOpacity(0.8),
-                        fontSize: 14,
+                        fontSize: 16,
                         fontFamily: 'Amiri',
                       ),
                       textAlign: TextAlign.right,
                       overflow: TextOverflow.ellipsis,
-                      maxLines: 1,
+                      maxLines: 2,
                     ),
                   ],
                 ),
@@ -233,7 +230,6 @@ class BranchesPage extends StatelessWidget {
     );
   }
 }
-
 
 // Old Design Code
 // import 'package:flutter/material.dart';
@@ -267,42 +263,42 @@ class BranchesPage extends StatelessWidget {
 //     Branch(
 //       name: "فرع الغوطة",
 //       manager: "ابو بسام",
-//       imageUrl: "images/logo.jpg",
+//       imageUrl: "images/logo.png",
 //       region: "الغوطة جانب رينبو الغوطة",
 //       phone: "0934567890",
 //     ),
 //     Branch(
 //       name: "فرع الحمرا",
 //       manager: "انس ابو احمد",
-//       imageUrl: "images/logo.jpg",
+//       imageUrl: "images/logo.png",
 //       region: "الحمرا جانب الملعب البلدي",
 //       phone: "0934567891",
 //     ),
 //     Branch(
 //       name: "فرع تركيا كوجالي",
 //       manager: "كريم ",
-//       imageUrl: "images/logo.jpg",
+//       imageUrl: "images/logo.png",
 //       region: "تركيا كوجالي",
 //       phone: "0934567893",
 //     ),
 //     Branch(
 //       name: "فرع الانشاءات",
 //       manager: "بلال",
-//       imageUrl: "images/logo.jpg",
+//       imageUrl: "images/logo.png",
 //       region: "الانشاءات",
 //       phone: "0934567892",
 //     ),
 //     Branch(
 //       name: "فرع الغوطة",
 //       manager: "ابو بسام",
-//       imageUrl: "images/logo.jpg",
+//       imageUrl: "images/logo.png",
 //       region: "الغوطة جانب رينبو الغوطة",
 //       phone: "0934567890",
 //     ),
 //     Branch(
 //       name: "فرع الحمرا",
 //       manager: "انس ابو احمد",
-//       imageUrl: "images/logo.jpg",
+//       imageUrl: "images/logo.png",
 //       region: "الحمرا جانب الملعب البلدي",
 //       phone: "0934567891",
 //     ),
@@ -345,12 +341,12 @@ class BranchesPage extends StatelessWidget {
 //           Padding(
 //             padding: const EdgeInsets.only(top: 40, bottom: 20),
 //             child: Image.asset(
-//               'images/logo.jpg',
+//               'images/logo.png',
 //               height: 150,
 //               fit: BoxFit.contain,
 //             ),
 //           ),
-          
+
 //           // شريط البحث
 //           Directionality(
 //             textDirection: TextDirection.rtl,
@@ -371,11 +367,21 @@ class BranchesPage extends StatelessWidget {
 //                 ),
 //                 child: TextField(
 //                   controller: _searchController,
-//                   style: const TextStyle(color: Colors.black87, fontFamily: 'Amiri'),
+//                   style: const TextStyle(
+//                     color: Colors.black87,
+//                     fontFamily: 'Amiri',
+//                   ),
 //                   decoration: InputDecoration(
 //                     hintText: 'ابحث عن فرع أو مدير...',
-//                     hintStyle: TextStyle(color: Colors.grey[700], fontFamily: 'Amiri'),
-//                     prefixIcon: const Icon(Icons.search, color: Color(0xFFFFD700), size: 28),
+//                     hintStyle: TextStyle(
+//                       color: Colors.grey[700],
+//                       fontFamily: 'Amiri',
+//                     ),
+//                     prefixIcon: const Icon(
+//                       Icons.search,
+//                       color: Color(0xFFFFD700),
+//                       size: 28,
+//                     ),
 //                     border: InputBorder.none,
 //                     contentPadding: const EdgeInsets.symmetric(
 //                       horizontal: 20,
@@ -396,7 +402,7 @@ class BranchesPage extends StatelessWidget {
 //               ),
 //             ),
 //           ),
-          
+
 //           // عنوان الفروع
 //           Padding(
 //             padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 25),
@@ -428,7 +434,7 @@ class BranchesPage extends StatelessWidget {
 //               ],
 //             ),
 //           ),
-          
+
 //           // قائمة الفروع
 //           Expanded(
 //             child: Container(
@@ -533,7 +539,11 @@ class BranchesPage extends StatelessWidget {
 //                     errorBuilder: (context, error, stackTrace) {
 //                       return Container(
 //                         color: Colors.grey[300],
-//                         child: const Icon(Icons.business, color: Colors.grey, size: 40),
+//                         child: const Icon(
+//                           Icons.business,
+//                           color: Colors.grey,
+//                           size: 40,
+//                         ),
 //                       );
 //                     },
 //                   ),
