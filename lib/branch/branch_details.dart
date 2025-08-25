@@ -1,3 +1,4 @@
+// branch_details.dart page
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -17,6 +18,25 @@ class BranchDetailsPage extends StatelessWidget {
       await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
     } else {
       throw 'لا يمكن فتح الرابط $url';
+    }
+  }
+
+  // دالة للاتصال
+  Future<void> _callPhone(String phoneNumber) async {
+    final Uri phoneUri = Uri(scheme: 'tel', path: phoneNumber);
+
+    if (!await launchUrl(phoneUri, mode: LaunchMode.externalApplication)) {
+      throw 'لا يمكن إجراء الاتصال على $phoneNumber';
+    }
+  }
+
+  // دالة لفتح واتساب
+  Future<void> _openWhatsApp(String phoneNumber) async {
+    // رقم واتساب لازم يكون مع كود الدولة بدون صفر
+    final Uri whatsappUri = Uri.parse("https://wa.me/$phoneNumber");
+
+    if (!await launchUrl(whatsappUri, mode: LaunchMode.externalApplication)) {
+      throw 'لا يمكن فتح الواتساب للرقم $phoneNumber';
     }
   }
 
@@ -214,7 +234,7 @@ class BranchDetailsPage extends StatelessWidget {
           ),
         ),
 
-        // الأزرار في أسفل الصفحة (بقيت كما هي)
+        // الأزرار في أسفل الصفحة
         bottomSheet: Container(
           padding: const EdgeInsets.all(12),
           decoration: const BoxDecoration(
@@ -225,7 +245,7 @@ class BranchDetailsPage extends StatelessWidget {
             children: [
               Expanded(
                 child: ElevatedButton.icon(
-                  onPressed: () {},
+                  onPressed: () => _callPhone("+963982767510"),
                   icon: const Icon(Icons.phone, size: 18, color: Colors.white),
                   label: const Text(
                     'اتصال',
@@ -247,7 +267,7 @@ class BranchDetailsPage extends StatelessWidget {
               const SizedBox(width: 16),
               Expanded(
                 child: ElevatedButton.icon(
-                  onPressed: () {},
+                  onPressed: () => _openWhatsApp("963982767510"),
                   icon: const Icon(
                     Icons.message,
                     size: 18,
