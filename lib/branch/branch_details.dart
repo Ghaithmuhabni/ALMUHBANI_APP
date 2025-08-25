@@ -140,6 +140,26 @@ class BranchDetailsPage extends StatelessWidget {
                   ),
                 ],
               ),
+
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  const Icon(Icons.phone, color: Color(0xFF8B0000), size: 20),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'ارقام التواصل: ${branch['linelnad_phone']} , ${branch['phone']}',
+                      style: TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 16,
+                        color: Colors.grey[900],
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+
               const SizedBox(height: 24),
 
               // خريطة غوغل
@@ -245,7 +265,7 @@ class BranchDetailsPage extends StatelessWidget {
             children: [
               Expanded(
                 child: ElevatedButton.icon(
-                  onPressed: () => _callPhone("+963982767510"),
+                  onPressed: () => _callPhone(branch['phone']),
                   icon: const Icon(Icons.phone, size: 18, color: Colors.white),
                   label: const Text(
                     'اتصال',
@@ -267,7 +287,9 @@ class BranchDetailsPage extends StatelessWidget {
               const SizedBox(width: 16),
               Expanded(
                 child: ElevatedButton.icon(
-                  onPressed: () => _openWhatsApp("963982767510"),
+                  // onPressed: () => _openWhatsApp("963982767510"),
+                  onPressed: () =>
+                      _openWhatsApp("963${branch['phone'].substring(1)}"),
                   icon: const Icon(
                     Icons.message,
                     size: 18,

@@ -7,6 +7,7 @@ class Branch {
   final String imageUrl;
   final String region;
   final String phone;
+  final String linelnad_phone;
 
   Branch({
     required this.name,
@@ -14,53 +15,36 @@ class Branch {
     required this.imageUrl,
     required this.region,
     required this.phone,
+    required this.linelnad_phone,
   });
 }
 
-class BranchesPage extends StatefulWidget {
-  const BranchesPage({Key? key}) : super(key: key);
+class BranchesPage extends StatelessWidget {
+  BranchesPage({Key? key}) : super(key: key);
 
-  @override
-  State<BranchesPage> createState() => _BranchesPageState();
-}
-
-class _BranchesPageState extends State<BranchesPage> {
   final List<Branch> branches = [
     Branch(
       name: "فرع الغوطة",
       manager: "أبو بسام",
       imageUrl: "images/logo1.png",
       region: " جانب رينبو الغوطة",
-      phone: "0934567890",
+      phone: "0982767510",
+      linelnad_phone: "2233256",
     ),
     Branch(
       name: "فرع الغوطة 2",
       manager: "أبو بسام",
       imageUrl: "images/logo1.png",
       region: "مقابل مدرسة غرناطة بعد الفرع الاول ب 200 متر",
-      phone: "0934567891",
+      phone: "0964540191",
+      linelnad_phone: "2213076",
     ),
   ];
-
-  late List<Branch> _filteredBranches;
-  final TextEditingController _searchController = TextEditingController();
-
-  @override
-  void initState() {
-    super.initState();
-    _filteredBranches = branches;
-  }
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFE8D5B5), // تغيير الخلفية إلى البيج
+      backgroundColor: const Color(0xFFE8D5B5),
       body: Column(
         children: [
           // الشعار
@@ -85,9 +69,7 @@ class _BranchesPageState extends State<BranchesPage> {
                     fontFamily: 'Amiri',
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
-                    color: const Color(
-                      0xFF8B0000,
-                    ), // تغيير اللون إلى الأحمر الداكن
+                    color: const Color(0xFF8B0000),
                     shadows: [
                       Shadow(
                         blurRadius: 2,
@@ -98,11 +80,9 @@ class _BranchesPageState extends State<BranchesPage> {
                   ),
                 ),
                 const SizedBox(width: 8),
-                Icon(
+                const Icon(
                   Icons.location_on,
-                  color: const Color(
-                    0xFF8B0000,
-                  ), // تغيير اللون إلى الأحمر الداكن
+                  color: Color(0xFF8B0000),
                   size: 28,
                 ),
               ],
@@ -113,42 +93,20 @@ class _BranchesPageState extends State<BranchesPage> {
           Expanded(
             child: Container(
               decoration: const BoxDecoration(
-                color: Color(0xFF8B0000), // تغيير الخلفية إلى الأحمر الداكن
+                color: Color(0xFF8B0000),
                 borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(15),
                   topRight: Radius.circular(15),
                 ),
               ),
-              child: _filteredBranches.isEmpty
-                  ? Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.search_off,
-                            size: 60,
-                            color: Colors.grey[300], // تغيير اللون إلى فاتح
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            'لا يوجد فروع مطابقة',
-                            style: TextStyle(
-                              fontFamily: 'Amiri',
-                              fontSize: 20,
-                              color: Colors.grey[300], // تغيير اللون إلى فاتح
-                            ),
-                          ),
-                        ],
-                      ),
-                    )
-                  : ListView.builder(
-                      padding: const EdgeInsets.fromLTRB(16, 20, 16, 16),
-                      itemCount: _filteredBranches.length,
-                      itemBuilder: (context, index) {
-                        final branch = _filteredBranches[index];
-                        return _buildBranchCard(branch, context);
-                      },
-                    ),
+              child: ListView.builder(
+                padding: const EdgeInsets.fromLTRB(16, 20, 16, 16),
+                itemCount: branches.length,
+                itemBuilder: (context, index) {
+                  final branch = branches[index];
+                  return _buildBranchCard(branch, context);
+                },
+              ),
             ),
           ),
         ],
@@ -165,7 +123,7 @@ class _BranchesPageState extends State<BranchesPage> {
         side: const BorderSide(
           color: Color(0xFF8B0000),
           width: 1.5,
-        ), // تغيير اللون إلى الأحمر الداكن
+        ),
       ),
       child: InkWell(
         onTap: () {
@@ -179,6 +137,7 @@ class _BranchesPageState extends State<BranchesPage> {
                   'image': branch.imageUrl,
                   'region': branch.region,
                   'phone': branch.phone,
+                  'linelnad_phone': branch.linelnad_phone,
                 },
               ),
             ),
@@ -189,16 +148,8 @@ class _BranchesPageState extends State<BranchesPage> {
           padding: const EdgeInsets.all(12),
           height: 120,
           decoration: BoxDecoration(
-            color: const Color(0xFFE8D5B5), // تغيير الخلفية إلى البيج
+            color: const Color(0xFFE8D5B5),
             borderRadius: BorderRadius.circular(15),
-            gradient: const LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Color(0xFFE8D5B5),
-                Color(0xFFE8D5B5),
-              ], // تغيير التدرج إلى البيج
-            ),
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -235,9 +186,7 @@ class _BranchesPageState extends State<BranchesPage> {
                     Text(
                       branch.name,
                       style: const TextStyle(
-                        color: Color(
-                          0xFF8B0000,
-                        ), // تغيير اللون إلى الأحمر الداكن
+                        color: Color(0xFF8B0000),
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                         fontFamily: 'Amiri',
@@ -249,9 +198,7 @@ class _BranchesPageState extends State<BranchesPage> {
                     Text(
                       "مدير الفرع: ${branch.manager}",
                       style: const TextStyle(
-                        color: Color(
-                          0xFF8B0000,
-                        ), // تغيير اللون إلى الأحمر الداكن
+                        color: Color(0xFF8B0000),
                         fontSize: 16,
                         fontFamily: 'Amiri',
                       ),
@@ -262,9 +209,7 @@ class _BranchesPageState extends State<BranchesPage> {
                     Text(
                       branch.region,
                       style: TextStyle(
-                        color: const Color(
-                          0xFF8B0000,
-                        ).withOpacity(0.8), // تغيير اللون إلى الأحمر الداكن
+                        color: const Color(0xFF8B0000).withOpacity(0.8),
                         fontSize: 14,
                         fontFamily: 'Amiri',
                       ),
@@ -276,10 +221,9 @@ class _BranchesPageState extends State<BranchesPage> {
                 ),
               ),
               const SizedBox(width: 8),
-              // أيقونة الانتقال للتفاصيل
-              Icon(
+              const Icon(
                 Icons.arrow_forward_ios,
-                color: const Color(0xFF8B0000), // تغيير اللون إلى الأحمر الداكن
+                color: Color(0xFF8B0000),
                 size: 20,
               ),
             ],
@@ -289,6 +233,7 @@ class _BranchesPageState extends State<BranchesPage> {
     );
   }
 }
+
 
 // Old Design Code
 // import 'package:flutter/material.dart';
