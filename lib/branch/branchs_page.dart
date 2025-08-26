@@ -35,7 +35,7 @@ class BranchesPage extends StatelessWidget {
       name: "فرع الغوطة 2",
       manager: "أبو بسام",
       imageUrl: "images/logo1.png",
-      region: "مقابل مدرسة غرناطة بعد الفرع الاول ب 200 متر",
+      region: "مقابل مدرسة غرناطة \n بعد الفرع الاول ب 200 متر",
       phone: "0964540191",
       linelnad_phone: "2213076",
     ),
@@ -120,7 +120,7 @@ class BranchesPage extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 16),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(15),
-        side: const BorderSide(color: Color(0xFF8B0000), width: 1.5),
+        side: const BorderSide(color: Color.fromARGB(255, 0, 0, 0), width: 2.5),
       ),
       child: InkWell(
         onTap: () {
