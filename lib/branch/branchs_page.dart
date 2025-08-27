@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/auth/login_page.dart';
 import 'branch_details.dart';
 
 class Branch {
@@ -50,10 +51,19 @@ class BranchesPage extends StatelessWidget {
           // الشعار
           Padding(
             padding: const EdgeInsets.only(top: 40, bottom: 20),
-            child: Image.asset(
-              'images/logo1.png',
-              height: 200,
-              fit: BoxFit.fitHeight,
+            child: GestureDetector(
+              onLongPress: () {
+                // الانتقال إلى صفحة تسجيل الدخول عند الضغط المطوّل
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => LoginPage()),
+                );
+              },
+              child: Image.asset(
+                'images/logo1.png',
+                height: 200,
+                fit: BoxFit.fitHeight,
+              ),
             ),
           ),
 

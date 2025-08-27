@@ -1,111 +1,122 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+  const LoginPage({Key? key}) : super(key: key);
 
   @override
   State<LoginPage> createState() => _LoginPageState();
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final emailController = TextEditingController();
-  final passwordController = TextEditingController();
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-
-  bool isLoading = false;
-  String? errorMessage;
-
-  void login() async {
-    setState(() {
-      isLoading = true;
-      errorMessage = null;
-    });
-
-    try {
-      await _auth.signInWithEmailAndPassword(
-        email: emailController.text.trim(),
-        password: passwordController.text.trim(),
-      );
-      Navigator.of(context).pop(); // العودة إلى الصفحة السابقة بعد تسجيل الدخول
-    } on FirebaseAuthException catch (e) {
-      setState(() {
-        errorMessage = e.message;
-      });
-    } finally {
-      setState(() {
-        isLoading = false;
-      });
-    }
-  }
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF8B0000),
+      backgroundColor: const Color(0xFFE8D5B5),
       body: Center(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
+          padding: const EdgeInsets.all(24.0),
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.lock, color: Colors.white, size: 80),
-              const SizedBox(height: 24),
-              const Text(
-                'تسجيل الدخول',
+              // اللوغو
+              Icon(
+                Icons.lock_outline,
+                size: 100,
+                color: Colors.redAccent.shade700,
+              ),
+              const SizedBox(height: 30),
+
+              // عنوان
+              Text(
+                "تسجيل الدخول",
                 style: TextStyle(
-                  fontFamily: 'Amiri',
-                  fontSize: 28,
-                  color: Colors.white,
+                  fontSize: 26,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.redAccent.shade700,
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 40),
+
+              // حقل البريد الإلكتروني
               TextField(
-                controller: emailController,
-                textDirection: TextDirection.rtl,
+                textAlign: TextAlign.right,
+                controller: _emailController,
                 decoration: InputDecoration(
-                  labelText: 'البريد الإلكتروني',
-                  labelStyle: const TextStyle(color: Colors.white),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.black, width: 1.8),
+                    borderRadius: BorderRadius.circular(20.0),
+                  ),
+                  prefixIcon: const Icon(Icons.email_outlined),
+                  hintText: "البريد الإلكتروني",
                   filled: true,
-                  fillColor: Colors.white24,
+                  fillColor: Colors.grey.shade100,
+                  contentPadding: const EdgeInsets.symmetric(
+                    vertical: 16.0,
+                    horizontal: 20.0,
+                  ),
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(20.0),
+                    borderSide: BorderSide(
+                      color: Colors.redAccent.shade700,
+                      style: BorderStyle.none,
+                    ),
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
+
+              // حقل كلمة المرور
               TextField(
-                controller: passwordController,
+                textAlign: TextAlign.right,
+                controller: _passwordController,
                 obscureText: true,
-                textDirection: TextDirection.rtl,
                 decoration: InputDecoration(
-                  labelText: 'كلمة المرور',
-                  labelStyle: const TextStyle(color: Colors.white),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.black, width: 1.8),
+                    borderRadius: BorderRadius.circular(20.0),
+                  ),
+                  prefixIcon: const Icon(Icons.lock_outline),
+                  hintText: "كلمة المرور",
                   filled: true,
-                  fillColor: Colors.white24,
+                  fillColor: Colors.grey.shade100,
+                  contentPadding: const EdgeInsets.symmetric(
+                    vertical: 16.0,
+                    horizontal: 20.0,
+                  ),
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(20.0),
+                    borderSide: BorderSide(
+                      color: Colors.redAccent.shade700,
+                      style: BorderStyle.none,
+                    ),
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
-              if (errorMessage != null)
-                Text(errorMessage!, style: const TextStyle(color: Colors.yellow)),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: isLoading ? null : login,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFFFD700),
-                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+              const SizedBox(height: 30),
+
+              // زر تسجيل الدخول
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    // تنفيذ تسجيل الدخول
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.redAccent.shade700,
+                    padding: const EdgeInsets.symmetric(vertical: 18),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    elevation: 5,
+                  ),
+                  child: const Text(
+                    "تسجيل الدخول",
+                    style: TextStyle(fontSize: 18, color: Colors.white),
+                  ),
                 ),
-                child: isLoading
-                    ? const CircularProgressIndicator(color: Color(0xFF8B0000))
-                    : const Text(
-                        'تسجيل الدخول',
-                        style: TextStyle(
-                          color: Color(0xFF8B0000),
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
               ),
             ],
           ),
