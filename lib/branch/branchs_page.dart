@@ -1,46 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/auth/login_page.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'branch_details.dart';
-
-class Branch {
-  final String name;
-  final String manager;
-  final String imageUrl;
-  final String region;
-  final String phone;
-  final String linelnad_phone;
-
-  Branch({
-    required this.name,
-    required this.manager,
-    required this.imageUrl,
-    required this.region,
-    required this.phone,
-    required this.linelnad_phone,
-  });
-}
+import '../auth/login_page.dart';
 
 class BranchesPage extends StatelessWidget {
-  BranchesPage({Key? key}) : super(key: key);
-
-  final List<Branch> branches = [
-    Branch(
-      name: "فرع الغوطة",
-      manager: "أبو بسام",
-      imageUrl: "images/logo1.png",
-      region: " جانب رينبو الغوطة",
-      phone: "0982767510",
-      linelnad_phone: "2233256",
-    ),
-    Branch(
-      name: "فرع الغوطة 2",
-      manager: "أبو بسام",
-      imageUrl: "images/logo1.png",
-      region: "مقابل مدرسة غرناطة \n بعد الفرع الاول ب 200 متر",
-      phone: "0964540191",
-      linelnad_phone: "2213076",
-    ),
-  ];
+  const BranchesPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -53,10 +17,9 @@ class BranchesPage extends StatelessWidget {
             padding: const EdgeInsets.only(top: 40, bottom: 20),
             child: GestureDetector(
               onLongPress: () {
-                // الانتقال إلى صفحة تسجيل الدخول عند الضغط المطوّل
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => LoginPage()),
+                  MaterialPageRoute(builder: (_) => const LoginPage()),
                 );
               },
               child: Image.asset(
@@ -109,12 +72,35 @@ class BranchesPage extends StatelessWidget {
                   topRight: Radius.circular(15),
                 ),
               ),
-              child: ListView.builder(
-                padding: const EdgeInsets.fromLTRB(16, 20, 16, 16),
-                itemCount: branches.length,
-                itemBuilder: (context, index) {
-                  final branch = branches[index];
-                  return _buildBranchCard(branch, context);
+              child: StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance
+                    .collection('branches')
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                    return const Center(
+                      child: Text(
+                        'لا توجد فروع',
+                        style: TextStyle(color: Colors.white, fontSize: 18),
+                      ),
+                    );
+                  }
+
+                  final branches = snapshot.data!.docs;
+
+                  return ListView.builder(
+                    padding: const EdgeInsets.fromLTRB(16, 20, 16, 16),
+                    itemCount: branches.length,
+                    itemBuilder: (context, index) {
+                      final branch = branches[index];
+                      final data = branch.data() as Map<String, dynamic>;
+
+                      return _buildBranchCard(data, context);
+                    },
+                  );
                 },
               ),
             ),
@@ -124,7 +110,7 @@ class BranchesPage extends StatelessWidget {
     );
   }
 
-  Widget _buildBranchCard(Branch branch, BuildContext context) {
+  Widget _buildBranchCard(Map<String, dynamic> data, BuildContext context) {
     return Card(
       elevation: 2,
       margin: const EdgeInsets.only(bottom: 16),
@@ -139,12 +125,11 @@ class BranchesPage extends StatelessWidget {
             MaterialPageRoute(
               builder: (_) => BranchDetailsPage(
                 branch: {
-                  'name': branch.name,
-                  'manager': branch.manager,
-                  'image': branch.imageUrl,
-                  'region': branch.region,
-                  'phone': branch.phone,
-                  'linelnad_phone': branch.linelnad_phone,
+                  'name': data['name'] ?? '',
+                  'manager': data['manager'] ?? '',
+                  'region': data['region'] ?? '',
+                  'phone': data['phone'] ?? '',
+                  'linelnad_phone': data['linelnad_phone'] ?? '',
                 },
               ),
             ),
@@ -161,26 +146,13 @@ class BranchesPage extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // صورة الشعار
+              // صورة الفرع
               Container(
                 width: 110,
                 height: 110,
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(8),
-                  child: Image.asset(
-                    branch.imageUrl,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        color: Colors.grey[300],
-                        child: Icon(
-                          Icons.business,
-                          color: Colors.grey[600],
-                          size: 40,
-                        ),
-                      );
-                    },
-                  ),
+                  child: Image.asset('images/logo1.png', fit: BoxFit.cover),
                 ),
               ),
               const SizedBox(width: 16),
@@ -191,7 +163,7 @@ class BranchesPage extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
-                      branch.name,
+                      data['name'] ?? '',
                       style: const TextStyle(
                         color: Color(0xFF8B0000),
                         fontSize: 22,
@@ -203,7 +175,7 @@ class BranchesPage extends StatelessWidget {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      "بإدارة : ${branch.manager}",
+                      "بإدارة : ${data['manager'] ?? ''}",
                       style: const TextStyle(
                         color: Color(0xFF8B0000),
                         fontSize: 18,
@@ -214,7 +186,7 @@ class BranchesPage extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      branch.region,
+                      data['region'] ?? '',
                       style: TextStyle(
                         color: const Color(0xFF8B0000).withOpacity(0.8),
                         fontSize: 16,

@@ -1,9 +1,12 @@
-// main.dart
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_application_1/auth/login_page.dart';
 import 'package:flutter_application_1/branch/branch_details.dart';
 import 'package:flutter_application_1/branch/branchs_page.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(); // تهيئة Firebase
   runApp(MyApp());
 }
 
@@ -14,11 +17,12 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'المهباني',
       theme: ThemeData(
-        fontFamily: 'Poppins', // الخط العام
+        fontFamily: 'Poppins',
         appBarTheme: AppBarTheme(backgroundColor: Color(0xFF8B0000)),
       ),
       initialRoute: '/',
       routes: {
+        '/login': (context) => LoginPage(),
         '/': (context) => BranchesPage(),
         '/branch-details': (context) {
           final args =

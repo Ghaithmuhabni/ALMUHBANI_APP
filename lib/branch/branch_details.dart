@@ -1,4 +1,3 @@
-// branch_details.dart page
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -49,7 +48,7 @@ class BranchDetailsPage extends StatelessWidget {
         appBar: AppBar(
           centerTitle: true,
           title: Text(
-            branch['name'],
+            branch['name'] ?? '',
             style: const TextStyle(
               fontFamily: 'Amiri',
               fontSize: 20,
@@ -70,14 +69,14 @@ class BranchDetailsPage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // صورة الفرع
+              // صورة ثابتة من الملف
               Container(
                 width: double.infinity,
                 height: 225,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
-                  image: DecorationImage(
-                    image: AssetImage(branch['image']),
+                  image: const DecorationImage(
+                    image: AssetImage('images/logo1.png'),
                     fit: BoxFit.fill,
                   ),
                 ),
@@ -86,7 +85,7 @@ class BranchDetailsPage extends StatelessWidget {
 
               // اسم المدير
               Text(
-                'مدير الفرع: ${branch['manager']}',
+                'مدير الفرع: ${branch['manager'] ?? ''}',
                 style: const TextStyle(
                   fontFamily: 'Amiri',
                   fontSize: 17,
@@ -107,7 +106,7 @@ class BranchDetailsPage extends StatelessWidget {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'المنطقة: حمص - ${branch['region']}',
+                      'المنطقة: ${branch['region'] ?? ''}',
                       style: TextStyle(
                         fontFamily: 'Poppins',
                         fontSize: 16,
@@ -120,7 +119,7 @@ class BranchDetailsPage extends StatelessWidget {
               ),
               const SizedBox(height: 16),
 
-              // أوقات العمل
+              // أوقات العمل (ثابتة حاليا)
               Row(
                 children: [
                   const Icon(
@@ -141,14 +140,14 @@ class BranchDetailsPage extends StatelessWidget {
                 ],
               ),
 
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
               Row(
                 children: [
                   const Icon(Icons.phone, color: Color(0xFF8B0000), size: 20),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'ارقام التواصل: ${branch['linelnad_phone']} , ${branch['phone']}',
+                      'ارقام التواصل: ${branch['linelnad_phone'] ?? ''} , ${branch['phone'] ?? ''}',
                       style: TextStyle(
                         fontFamily: 'Poppins',
                         fontSize: 16,
@@ -180,15 +179,11 @@ class BranchDetailsPage extends StatelessWidget {
                 ),
                 child: Stack(
                   children: [
-                    // Google Map
                     ClipRRect(
                       borderRadius: BorderRadius.circular(12),
                       child: GoogleMap(
                         initialCameraPosition: const CameraPosition(
-                          target: LatLng(
-                            34.73309996612312,
-                            36.703286909408746,
-                          ), // الإحداثيات
+                          target: LatLng(34.73309996612312, 36.703286909408746),
                           zoom: 15,
                         ),
                         markers: {
@@ -236,7 +231,7 @@ class BranchDetailsPage extends StatelessWidget {
               ),
               const SizedBox(height: 24),
 
-              // قائمة الطعام
+              // قائمة الطعام (مثال ثابت)
               const Text(
                 'القائمة',
                 style: TextStyle(
@@ -265,7 +260,7 @@ class BranchDetailsPage extends StatelessWidget {
             children: [
               Expanded(
                 child: ElevatedButton.icon(
-                  onPressed: () => _callPhone(branch['phone']),
+                  onPressed: () => _callPhone(branch['phone'] ?? ''),
                   icon: const Icon(Icons.phone, size: 18, color: Colors.white),
                   label: const Text(
                     'اتصال',
@@ -287,9 +282,12 @@ class BranchDetailsPage extends StatelessWidget {
               const SizedBox(width: 16),
               Expanded(
                 child: ElevatedButton.icon(
-                  // onPressed: () => _openWhatsApp("963982767510"),
-                  onPressed: () =>
-                      _openWhatsApp("963${branch['phone'].substring(1)}"),
+                  onPressed: () {
+                    final phone = branch['phone'] ?? '';
+                    if (phone.isNotEmpty && phone.startsWith('0')) {
+                      _openWhatsApp("963${phone.substring(1)}");
+                    }
+                  },
                   icon: const Icon(
                     Icons.message,
                     size: 18,
@@ -334,7 +332,7 @@ class BranchDetailsPage extends StatelessWidget {
           margin: const EdgeInsets.symmetric(vertical: 8),
           decoration: BoxDecoration(
             color: Colors.white,
-            border: Border.all(color: Color(0xFF8B0000), width: 1.5),
+            border: Border.all(color: const Color(0xFF8B0000), width: 1.5),
             borderRadius: BorderRadius.circular(16),
             boxShadow: const [
               BoxShadow(
