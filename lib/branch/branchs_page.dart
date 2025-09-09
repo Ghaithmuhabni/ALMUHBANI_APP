@@ -1,10 +1,13 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'branch_details.dart';
 import '../auth/login_page.dart';
 
 class BranchesPage extends StatelessWidget {
-  const BranchesPage({Key? key}) : super(key: key);
+   BranchesPage({Key? key}) : super(key: key);
+
+  final user = FirebaseAuth.instance.currentUser;
 
   @override
   Widget build(BuildContext context) {
@@ -36,6 +39,8 @@ class BranchesPage extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
+                Icon(Icons.logout, color: Color(0xFF8B0000), size: 28),
+                SizedBox(width: 170),
                 Text(
                   "الفروع المتاحة",
                   style: TextStyle(

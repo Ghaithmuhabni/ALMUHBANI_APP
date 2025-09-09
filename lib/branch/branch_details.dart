@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/branch/add_item.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class BranchDetailsPage extends StatelessWidget {
   static const String routeName = '/branch-details';
@@ -31,7 +33,6 @@ class BranchDetailsPage extends StatelessWidget {
 
   // دالة لفتح واتساب
   Future<void> _openWhatsApp(String phoneNumber) async {
-    // رقم واتساب لازم يكون مع كود الدولة بدون صفر
     final Uri whatsappUri = Uri.parse("https://wa.me/$phoneNumber");
 
     if (!await launchUrl(whatsappUri, mode: LaunchMode.externalApplication)) {
@@ -168,7 +169,7 @@ class BranchDetailsPage extends StatelessWidget {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
                   color: Colors.white,
-                  border: Border.all(color: const Color(0xFF8B0000), width: 2),
+                  border: Border.all(color: Color(0xFF8B0000), width: 2),
                   boxShadow: const [
                     BoxShadow(
                       color: Colors.black26,
@@ -231,15 +232,45 @@ class BranchDetailsPage extends StatelessWidget {
               ),
               const SizedBox(height: 24),
 
-              // قائمة الطعام (مثال ثابت)
-              const Text(
-                'القائمة',
-                style: TextStyle(
-                  fontFamily: 'Amiri',
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF8B0000),
-                ),
+              // القائمة + زر الإضافة إذا الأدمن مسجل دخول
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'القائمة',
+                    style: TextStyle(
+                      fontFamily: 'Amiri',
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF8B0000),
+                    ),
+                  ),
+                  StreamBuilder<User?>(
+                    stream: FirebaseAuth.instance.authStateChanges(),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        return IconButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    AddItemPage(branchId: branch['id']),
+                              ),
+                            );
+                          },
+                          icon: const Icon(
+                            Icons.add_circle,
+                            color: Color(0xFF8B0000),
+                            size: 28,
+                          ),
+                        );
+                      } else {
+                        return const SizedBox.shrink();
+                      }
+                    },
+                  ),
+                ],
               ),
               const SizedBox(height: 12),
               _buildMenuItems(),
@@ -317,13 +348,12 @@ class BranchDetailsPage extends StatelessWidget {
     );
   }
 
-  // قائمة الطعام
+  // قائمة الطعام (ثابتة الآن، لاحقاً بنربطها مع Firestore)
   Widget _buildMenuItems() {
     final List<Map<String, dynamic>> menu = [
       {'name': 'معمول بالفستق', 'price': '5,000', 'image': 'images/mamoul.jpg'},
       {'name': 'بقلاوة', 'price': '4,500', 'image': 'images/mamoul.jpg'},
       {'name': 'كنافة بالجبنة', 'price': '6,000', 'image': 'images/mamoul.jpg'},
-      {'name': 'سبيكة السحالي', 'price': '7,000', 'image': 'images/mamoul.jpg'},
     ];
 
     return Column(
