@@ -3,6 +3,7 @@ import 'package:flutter_application_1/branch/add_item.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class BranchDetailsPage extends StatelessWidget {
   static const String routeName = '/branch-details';
@@ -42,6 +43,8 @@ class BranchDetailsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser; // ✅ معرفة حالة تسجيل الدخول
+
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
@@ -245,35 +248,27 @@ class BranchDetailsPage extends StatelessWidget {
                       color: Color(0xFF8B0000),
                     ),
                   ),
-                  StreamBuilder<User?>(
-                    stream: FirebaseAuth.instance.authStateChanges(),
-                    builder: (context, snapshot) {
-                      if (snapshot.hasData) {
-                        return IconButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    AddItemPage(branchId: branch['id']),
-                              ),
-                            );
-                          },
-                          icon: const Icon(
-                            Icons.add_circle,
-                            color: Color(0xFF8B0000),
-                            size: 28,
+                  if (user != null) // ✅ فقط اذا الأدمن مسجل دخول
+                    IconButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                AddItemPage(branchId: branch['id']),
                           ),
                         );
-                      } else {
-                        return const SizedBox.shrink();
-                      }
-                    },
-                  ),
+                      },
+                      icon: const Icon(
+                        Icons.add_circle,
+                        color: Color(0xFF8B0000),
+                        size: 28,
+                      ),
+                    ),
                 ],
               ),
               const SizedBox(height: 12),
-              _buildMenuItems(),
+              _buildMenuItems(branch['id']), // ✅ استدعاء القائمة من Firestore
 
               const SizedBox(height: 80),
             ],
@@ -348,64 +343,93 @@ class BranchDetailsPage extends StatelessWidget {
     );
   }
 
-  // قائمة الطعام (ثابتة الآن، لاحقاً بنربطها مع Firestore)
-  Widget _buildMenuItems() {
-    final List<Map<String, dynamic>> menu = [
-      {'name': 'معمول بالفستق', 'price': '5,000', 'image': 'images/mamoul.jpg'},
-      {'name': 'بقلاوة', 'price': '4,500', 'image': 'images/mamoul.jpg'},
-      {'name': 'كنافة بالجبنة', 'price': '6,000', 'image': 'images/mamoul.jpg'},
-    ];
+  // ✅ جلب قائمة الطعام من Firestore
+  Widget _buildMenuItems(String branchId) {
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection("branches")
+          .doc(branchId)
+          .collection("menu")
+          .orderBy("createdAt", descending: true)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
 
-    return Column(
-      children: menu.map((item) {
-        return Container(
-          margin: const EdgeInsets.symmetric(vertical: 8),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border.all(color: const Color(0xFF8B0000), width: 1.5),
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: const [
-              BoxShadow(
-                color: Colors.black12,
-                blurRadius: 4,
-                offset: Offset(0, 2),
-              ),
-            ],
-          ),
-          child: ListTile(
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 12,
-              vertical: 8,
+        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          return const Center(
+            child: Text(
+              "لا توجد أصناف مضافة بعد",
+              style: TextStyle(fontFamily: 'Amiri', fontSize: 16),
             ),
-            leading: ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: Image.asset(
-                item['image'],
-                width: 100,
-                height: 100,
-                fit: BoxFit.cover,
+          );
+        }
+
+        final items = snapshot.data!.docs;
+
+        return Column(
+          children: items.map((doc) {
+            final data = doc.data() as Map<String, dynamic>;
+            return Container(
+              margin: const EdgeInsets.symmetric(vertical: 8),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                border: Border.all(color: const Color(0xFF8B0000), width: 1.5),
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 4,
+                    offset: Offset(0, 2),
+                  ),
+                ],
               ),
-            ),
-            title: Text(
-              item['name'],
-              style: const TextStyle(
-                fontFamily: 'Amiri',
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF8B0000),
+              child: ListTile(
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                leading: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child:
+                      data["image"] != null &&
+                          data["image"].toString().isNotEmpty
+                      ? Image.network(
+                          data["image"],
+                          width: 100,
+                          height: 100,
+                          fit: BoxFit.cover,
+                        )
+                      : Image.asset(
+                          "images/logo1.png", // صورة افتراضية
+                          width: 100,
+                          height: 100,
+                          fit: BoxFit.cover,
+                        ),
+                ),
+                title: Text(
+                  data["name"] ?? "",
+                  style: const TextStyle(
+                    fontFamily: 'Amiri',
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF8B0000),
+                  ),
+                ),
+                subtitle: Text(
+                  "${data["price"] ?? ""} ل.س",
+                  style: const TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 14,
+                    color: Colors.black87,
+                  ),
+                ),
               ),
-            ),
-            subtitle: Text(
-              '${item['price']} ل.س',
-              style: const TextStyle(
-                fontFamily: 'Poppins',
-                fontSize: 14,
-                color: Colors.black87,
-              ),
-            ),
-          ),
+            );
+          }).toList(),
         );
-      }).toList(),
+      },
     );
   }
 }

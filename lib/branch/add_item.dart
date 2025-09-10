@@ -21,6 +21,8 @@ class _AddItemPageState extends State<AddItemPage> {
   File? _imageFile;
   bool _isLoading = false;
 
+  String? _unit; // "كيلو" أو "قطعة"
+
   Future<void> _pickImage() async {
     final pickedFile = await ImagePicker().pickImage(
       source: ImageSource.gallery,
@@ -36,27 +38,27 @@ class _AddItemPageState extends State<AddItemPage> {
   Future<void> _addItem() async {
     if (!_formKey.currentState!.validate()) return;
 
-    if (_imageFile == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("الرجاء اختيار صورة للمنتج")),
-      );
-      return;
-    }
-
     try {
       setState(() {
         _isLoading = true;
       });
 
-      // رفع الصورة إلى Firebase Storage
-      final fileName = "${DateTime.now().millisecondsSinceEpoch}.jpg";
-      final storageRef = FirebaseStorage.instance
-          .ref()
-          .child("items")
-          .child(fileName);
+      String? imageUrl;
+      if (_imageFile != null) {
+        // رفع الصورة إلى Firebase Storage
+        final fileName = "${DateTime.now().millisecondsSinceEpoch}.jpg";
+        final storageRef =
+            FirebaseStorage.instance.ref().child("items").child(fileName);
 
-      await storageRef.putFile(_imageFile!);
-      final imageUrl = await storageRef.getDownloadURL();
+        await storageRef.putFile(_imageFile!);
+        imageUrl = await storageRef.getDownloadURL();
+      }
+
+      // تحديد النص النهائي للسعر
+      String priceText =
+          _unit == "كيلو"
+              ? "الكيلو بـ ${_priceController.text.trim()}"
+              : "القطعة بـ ${_priceController.text.trim()}";
 
       // إضافة البيانات إلى Firestore
       await FirebaseFirestore.instance
@@ -64,11 +66,12 @@ class _AddItemPageState extends State<AddItemPage> {
           .doc(widget.branchId)
           .collection("menu")
           .add({
-            "name": _nameController.text.trim(),
-            "price": _priceController.text.trim(),
-            "image": imageUrl,
-            "createdAt": FieldValue.serverTimestamp(),
-          });
+        "name": _nameController.text.trim(),
+        "price": priceText,
+        "image": imageUrl ?? "", // إذا ما اختار صورة نخليها نص فاضي
+        "unit": _unit,
+        "createdAt": FieldValue.serverTimestamp(),
+      });
 
       Navigator.pop(context); // رجوع بعد الإضافة
     } catch (e) {
@@ -80,6 +83,17 @@ class _AddItemPageState extends State<AddItemPage> {
         _isLoading = false;
       });
     }
+  }
+
+  InputDecoration _inputDecoration(String label) {
+    return InputDecoration(
+      labelText: label,
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+      focusedBorder: OutlineInputBorder(
+        borderSide: const BorderSide(color: Color(0xFF8B0000), width: 2),
+        borderRadius: BorderRadius.circular(12),
+      ),
+    );
   }
 
   @override
@@ -103,10 +117,7 @@ class _AddItemPageState extends State<AddItemPage> {
                 // الاسم
                 TextFormField(
                   controller: _nameController,
-                  decoration: const InputDecoration(
-                    labelText: "اسم الصنف",
-                    border: OutlineInputBorder(),
-                  ),
+                  decoration: _inputDecoration("اسم الصنف"),
                   validator: (value) =>
                       value == null || value.isEmpty ? "أدخل اسم الصنف" : null,
                 ),
@@ -115,17 +126,26 @@ class _AddItemPageState extends State<AddItemPage> {
                 // السعر
                 TextFormField(
                   controller: _priceController,
-                  decoration: const InputDecoration(
-                    labelText: "السعر",
-                    border: OutlineInputBorder(),
-                  ),
+                  decoration: _inputDecoration("السعر"),
                   keyboardType: TextInputType.number,
                   validator: (value) =>
                       value == null || value.isEmpty ? "أدخل السعر" : null,
                 ),
                 const SizedBox(height: 16),
 
-                // اختيار صورة
+                // الوحدة (كيلو / قطعة)
+                DropdownButtonFormField<String>(
+                  decoration: _inputDecoration("الوحدة"),
+                  items: const [
+                    DropdownMenuItem(value: "كيلو", child: Text("كيلو")),
+                    DropdownMenuItem(value: "قطعة", child: Text("قطعة")),
+                  ],
+                  onChanged: (val) => setState(() => _unit = val),
+                  validator: (val) => val == null ? "اختر الوحدة" : null,
+                ),
+                const SizedBox(height: 16),
+
+                // اختيار صورة (اختياري)
                 GestureDetector(
                   onTap: _pickImage,
                   child: Container(
@@ -136,7 +156,7 @@ class _AddItemPageState extends State<AddItemPage> {
                       color: Colors.grey[200],
                     ),
                     child: _imageFile == null
-                        ? const Center(child: Text("اضغط لاختيار صورة"))
+                        ? const Center(child: Text("اضغط لاختيار صورة (اختياري)"))
                         : Image.file(_imageFile!, fit: BoxFit.cover),
                   ),
                 ),
@@ -148,6 +168,9 @@ class _AddItemPageState extends State<AddItemPage> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF8B0000),
                     padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                   child: _isLoading
                       ? const CircularProgressIndicator(color: Colors.white)

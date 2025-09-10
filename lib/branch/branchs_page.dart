@@ -1,3 +1,4 @@
+//branchs_page.dart
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -5,7 +6,7 @@ import 'branch_details.dart';
 import '../auth/login_page.dart';
 
 class BranchesPage extends StatelessWidget {
-   BranchesPage({Key? key}) : super(key: key);
+  BranchesPage({Key? key}) : super(key: key);
 
   final user = FirebaseAuth.instance.currentUser;
 
@@ -20,10 +21,13 @@ class BranchesPage extends StatelessWidget {
             padding: const EdgeInsets.only(top: 40, bottom: 20),
             child: GestureDetector(
               onLongPress: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const LoginPage()),
-                );
+                // فقط إذا لم يكن مسجل دخول → يروح على صفحة تسجيل الدخول
+                if (FirebaseAuth.instance.currentUser == null) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const LoginPage()),
+                  );
+                }
               },
               child: Image.asset(
                 'images/logo1.png',
@@ -33,14 +37,29 @@ class BranchesPage extends StatelessWidget {
             ),
           ),
 
-          // عنوان الفروع
+          // عنوان الفروع + زر تسجيل الخروج (للأدمن فقط)
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 25),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                Icon(Icons.logout, color: Color(0xFF8B0000), size: 28),
-                SizedBox(width: 170),
+                // إذا المستخدم مسجل دخول (أدمن) → إظهر زر تسجيل الخروج
+                if (user != null)
+                  IconButton(
+                    icon: const Icon(
+                      Icons.logout,
+                      color: Color(0xFF8B0000),
+                      size: 28,
+                    ),
+                    onPressed: () async {
+                      await FirebaseAuth.instance.signOut();
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (_) => const LoginPage()),
+                      );
+                    },
+                  ),
+                const SizedBox(width: 140),
                 Text(
                   "الفروع المتاحة",
                   style: TextStyle(
@@ -130,6 +149,7 @@ class BranchesPage extends StatelessWidget {
             MaterialPageRoute(
               builder: (_) => BranchDetailsPage(
                 branch: {
+                  'id': data["id"],
                   'name': data['name'] ?? '',
                   'manager': data['manager'] ?? '',
                   'region': data['region'] ?? '',
