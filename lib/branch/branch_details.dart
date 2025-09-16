@@ -1,3 +1,4 @@
+//branch_details.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/branch/add_item.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -41,6 +42,107 @@ class BranchDetailsPage extends StatelessWidget {
     }
   }
 
+  // ✅ نافذة تعديل المنتج
+  void _editItem(
+    BuildContext context,
+    String branchId,
+    String docId,
+    Map<String, dynamic> data,
+  ) {
+    final TextEditingController nameController = TextEditingController(
+      text: data["name"],
+    );
+    final TextEditingController priceController = TextEditingController(
+      text: data["price"],
+    );
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text(
+            "تعديل المنتج",
+            style: TextStyle(fontFamily: "Amiri"),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: nameController,
+                decoration: const InputDecoration(labelText: "اسم الصنف"),
+              ),
+              TextField(
+                controller: priceController,
+                decoration: const InputDecoration(labelText: "السعر"),
+                keyboardType: TextInputType.number,
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("إلغاء"),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                await FirebaseFirestore.instance
+                    .collection("branches")
+                    .doc(branchId)
+                    .collection("menu")
+                    .doc(docId)
+                    .update({
+                      "name": nameController.text.trim(),
+                      "price": priceController.text.trim(),
+                    });
+                Navigator.pop(context);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF8B0000),
+              ),
+              child: const Text("حفظ", style: TextStyle(color: Colors.white)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // ✅ تأكيد حذف المنتج
+  void _deleteItem(BuildContext context, String branchId, String docId) async {
+    final confirm = await showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text(
+            "تأكيد الحذف",
+            style: TextStyle(fontFamily: "Amiri"),
+          ),
+          content: const Text("هل أنت متأكد أنك تريد حذف هذا المنتج؟"),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text("إلغاء"),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context, true),
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+              child: const Text("حذف", style: TextStyle(color: Colors.white)),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirm == true) {
+      await FirebaseFirestore.instance
+          .collection("branches")
+          .doc(branchId)
+          .collection("menu")
+          .doc(docId)
+          .delete();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser; // ✅ معرفة حالة تسجيل الدخول
@@ -68,211 +170,224 @@ class BranchDetailsPage extends StatelessWidget {
           ),
         ),
 
-        body: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // صورة ثابتة من الملف
-              Container(
-                width: double.infinity,
-                height: 225,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  image: const DecorationImage(
-                    image: AssetImage('images/logo1.png'),
-                    fit: BoxFit.fill,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // اسم المدير
-              Text(
-                'مدير الفرع: ${branch['manager'] ?? ''}',
-                style: const TextStyle(
-                  fontFamily: 'Amiri',
-                  fontSize: 17,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF8B0000),
-                ),
-              ),
-              const SizedBox(height: 8),
-
-              // العنوان
-              Row(
-                children: [
-                  const Icon(
-                    Icons.location_on,
-                    color: Color(0xFF8B0000),
-                    size: 20,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'المنطقة: ${branch['region'] ?? ''}',
-                      style: TextStyle(
-                        fontFamily: 'Poppins',
-                        fontSize: 16,
-                        color: Colors.grey[900],
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-
-              // أوقات العمل (ثابتة حاليا)
-              Row(
-                children: [
-                  const Icon(
-                    Icons.access_time,
-                    color: Color(0xFF8B0000),
-                    size: 20,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'مفتوح من 8:00 صباحاً إلى 10:00 مساءً',
-                    style: TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 16,
-                      color: Colors.grey[900],
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  const Icon(Icons.phone, color: Color(0xFF8B0000), size: 20),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'ارقام التواصل: ${branch['linelnad_phone'] ?? ''} , ${branch['phone'] ?? ''}',
-                      style: TextStyle(
-                        fontFamily: 'Poppins',
-                        fontSize: 16,
-                        color: Colors.grey[900],
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 24),
-
-              // خريطة غوغل
-              Container(
-                width: double.infinity,
-                height: 200,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  color: Colors.white,
-                  border: Border.all(color: Color(0xFF8B0000), width: 2),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Colors.black26,
-                      blurRadius: 5,
-                      offset: Offset(0, 3),
-                    ),
-                  ],
-                ),
-                child: Stack(
+        body: Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: GoogleMap(
-                        initialCameraPosition: const CameraPosition(
-                          target: LatLng(34.73309996612312, 36.703286909408746),
-                          zoom: 15,
+                    // صورة ثابتة من الملف
+                    Container(
+                      width: double.infinity,
+                      height: 225,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        image: const DecorationImage(
+                          image: AssetImage('images/logo1.png'),
+                          fit: BoxFit.fill,
                         ),
-                        markers: {
-                          const Marker(
-                            markerId: MarkerId("branch"),
-                            position: LatLng(
-                              34.73309996612312,
-                              36.703286909408746,
-                            ),
-                            infoWindow: InfoWindow(title: "فرعنا هنا"),
-                          ),
-                        },
-                        zoomControlsEnabled: false,
-                        myLocationButtonEnabled: false,
                       ),
                     ),
-                    Positioned(
-                      bottom: 8,
-                      right: 8,
-                      child: ElevatedButton.icon(
-                        onPressed: _openGoogleMaps,
-                        icon: const Icon(
-                          Icons.directions,
-                          size: 16,
-                          color: Colors.white,
+                    const SizedBox(height: 16),
+
+                    // اسم المدير
+                    Text(
+                      'مدير الفرع: ${branch['manager'] ?? ''}',
+                      style: const TextStyle(
+                        fontFamily: 'Amiri',
+                        fontSize: 17,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF8B0000),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+
+                    // العنوان
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.location_on,
+                          color: Color(0xFF8B0000),
+                          size: 20,
                         ),
-                        label: const Text(
-                          'الاتجاهات',
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'المنطقة: ${branch['region'] ?? ''}',
+                            style: TextStyle(
+                              fontFamily: 'Poppins',
+                              fontSize: 16,
+                              color: Colors.grey[900],
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+
+                    // أوقات العمل (ثابتة حاليا)
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.access_time,
+                          color: Color(0xFF8B0000),
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'مفتوح من 8:00 صباحاً إلى 10:00 مساءً',
                           style: TextStyle(
                             fontFamily: 'Poppins',
-                            fontSize: 12,
-                            color: Colors.white,
+                            fontSize: 16,
+                            color: Colors.grey[900],
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF8B0000),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
+                      ],
+                    ),
+
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        const Icon(Icons.phone,
+                            color: Color(0xFF8B0000), size: 20),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'ارقام التواصل: ${branch['linelnad_phone'] ?? ''} , ${branch['phone'] ?? ''}',
+                            style: TextStyle(
+                              fontFamily: 'Poppins',
+                              fontSize: 16,
+                              color: Colors.grey[900],
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    // خريطة غوغل
+                    Container(
+                      width: double.infinity,
+                      height: 200,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        color: Colors.white,
+                        border:
+                            Border.all(color: Color(0xFF8B0000), width: 2),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Colors.black26,
+                            blurRadius: 5,
+                            offset: Offset(0, 3),
+                          ),
+                        ],
+                      ),
+                      child: Stack(
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: GoogleMap(
+                              initialCameraPosition: const CameraPosition(
+                                target: LatLng(
+                                    34.73309996612312, 36.703286909408746),
+                                zoom: 15,
+                              ),
+                              markers: {
+                                const Marker(
+                                  markerId: MarkerId("branch"),
+                                  position: LatLng(
+                                    34.73309996612312,
+                                    36.703286909408746,
+                                  ),
+                                  infoWindow: InfoWindow(title: "فرعنا هنا"),
+                                ),
+                              },
+                              zoomControlsEnabled: false,
+                              myLocationButtonEnabled: false,
+                            ),
+                          ),
+                          Positioned(
+                            bottom: 8,
+                            right: 8,
+                            child: ElevatedButton.icon(
+                              onPressed: _openGoogleMaps,
+                              icon: const Icon(
+                                Icons.directions,
+                                size: 16,
+                                color: Colors.white,
+                              ),
+                              label: const Text(
+                                'الاتجاهات',
+                                style: TextStyle(
+                                  fontFamily: 'Poppins',
+                                  fontSize: 12,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF8B0000),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
+                    const SizedBox(height: 24),
+
+                    // القائمة + زر الإضافة إذا الأدمن مسجل دخول
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'القائمة',
+                          style: TextStyle(
+                            fontFamily: 'Amiri',
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF8B0000),
+                          ),
+                        ),
+                        if (user != null) // ✅ فقط اذا الأدمن مسجل دخول
+                          IconButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      AddItemPage(branchId: branch['id']),
+                                ),
+                              );
+                            },
+                            icon: const Icon(
+                              Icons.add_circle,
+                              color: Color(0xFF8B0000),
+                              size: 28,
+                            ),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+
+                    SizedBox(
+                      height: 400, // ارتفاع افتراضي للقائمة
+                      child: _buildMenuItems(branch['id'], user),
+                    ),
+
+                    const SizedBox(height: 80),
                   ],
                 ),
               ),
-              const SizedBox(height: 24),
-
-              // القائمة + زر الإضافة إذا الأدمن مسجل دخول
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'القائمة',
-                    style: TextStyle(
-                      fontFamily: 'Amiri',
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF8B0000),
-                    ),
-                  ),
-                  if (user != null) // ✅ فقط اذا الأدمن مسجل دخول
-                    IconButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                AddItemPage(branchId: branch['id']),
-                          ),
-                        );
-                      },
-                      icon: const Icon(
-                        Icons.add_circle,
-                        color: Color(0xFF8B0000),
-                        size: 28,
-                      ),
-                    ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              _buildMenuItems(branch['id']), // ✅ استدعاء القائمة من Firestore
-
-              const SizedBox(height: 80),
-            ],
-          ),
+            ),
+          ],
         ),
 
         // الأزرار في أسفل الصفحة
@@ -280,7 +395,8 @@ class BranchDetailsPage extends StatelessWidget {
           padding: const EdgeInsets.all(12),
           decoration: const BoxDecoration(
             color: Colors.white,
-            border: Border(top: BorderSide(color: Color(0xFF8B0000), width: 2)),
+            border:
+                Border(top: BorderSide(color: Color(0xFF8B0000), width: 2)),
           ),
           child: Row(
             children: [
@@ -343,14 +459,14 @@ class BranchDetailsPage extends StatelessWidget {
     );
   }
 
-  // ✅ جلب قائمة الطعام من Firestore
-  Widget _buildMenuItems(String branchId) {
+  // ✅ جلب قائمة الطعام من Firestore مع ReorderableListView
+  Widget _buildMenuItems(String branchId, User? user) {
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
           .collection("branches")
           .doc(branchId)
           .collection("menu")
-          .orderBy("createdAt", descending: true)
+          .orderBy("position")
           .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -368,10 +484,31 @@ class BranchDetailsPage extends StatelessWidget {
 
         final items = snapshot.data!.docs;
 
-        return Column(
-          children: items.map((doc) {
+        return ReorderableListView.builder(
+          itemCount: items.length,
+          onReorder: (oldIndex, newIndex) async {
+            if (newIndex > oldIndex) newIndex -= 1;
+
+            final updatedItems = List.from(items);
+            final movedItem = updatedItems.removeAt(oldIndex);
+            updatedItems.insert(newIndex, movedItem);
+
+            // تحديث كل العناصر بالترتيب الجديد
+            for (int i = 0; i < updatedItems.length; i++) {
+              final doc = updatedItems[i];
+              await FirebaseFirestore.instance
+                  .collection("branches")
+                  .doc(branchId)
+                  .collection("menu")
+                  .doc(doc.id)
+                  .update({"position": i});
+            }
+          },
+          itemBuilder: (context, index) {
+            final doc = items[index];
             final data = doc.data() as Map<String, dynamic>;
             return Container(
+              key: ValueKey(doc.id),
               margin: const EdgeInsets.symmetric(vertical: 8),
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -392,8 +529,7 @@ class BranchDetailsPage extends StatelessWidget {
                 ),
                 leading: ClipRRect(
                   borderRadius: BorderRadius.circular(12),
-                  child:
-                      data["image"] != null &&
+                  child: data["image"] != null &&
                           data["image"].toString().isNotEmpty
                       ? Image.network(
                           data["image"],
@@ -402,7 +538,7 @@ class BranchDetailsPage extends StatelessWidget {
                           fit: BoxFit.cover,
                         )
                       : Image.asset(
-                          "images/logo1.png", // صورة افتراضية
+                          "images/logo1.png",
                           width: 100,
                           height: 100,
                           fit: BoxFit.cover,
@@ -425,14 +561,44 @@ class BranchDetailsPage extends StatelessWidget {
                     color: Colors.black87,
                   ),
                 ),
+                onTap: user != null
+                    ? () {
+                        showModalBottomSheet(
+                          context: context,
+                          builder: (context) => Wrap(
+                            children: [
+                              ListTile(
+                                leading: const Icon(Icons.edit,
+                                    color: Colors.blue),
+                                title: const Text("تعديل"),
+                                onTap: () {
+                                  Navigator.pop(context);
+                                  _editItem(context, branchId, doc.id, data);
+                                },
+                              ),
+                              ListTile(
+                                leading: const Icon(Icons.delete,
+                                    color: Colors.red),
+                                title: const Text("حذف"),
+                                onTap: () {
+                                  Navigator.pop(context);
+                                  _deleteItem(context, branchId, doc.id);
+                                },
+                              ),
+                            ],
+                          ),
+                        );
+                      }
+                    : null,
               ),
             );
-          }).toList(),
+          },
         );
       },
     );
   }
 }
+
 
 // import 'package:flutter/material.dart';
 // // import 'package:url_launcher/url_launcher.dart';

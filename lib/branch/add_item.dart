@@ -47,18 +47,34 @@ class _AddItemPageState extends State<AddItemPage> {
       if (_imageFile != null) {
         // رفع الصورة إلى Firebase Storage
         final fileName = "${DateTime.now().millisecondsSinceEpoch}.jpg";
-        final storageRef =
-            FirebaseStorage.instance.ref().child("items").child(fileName);
+        final storageRef = FirebaseStorage.instance
+            .ref()
+            .child("items")
+            .child(fileName);
 
         await storageRef.putFile(_imageFile!);
         imageUrl = await storageRef.getDownloadURL();
       }
 
       // تحديد النص النهائي للسعر
-      String priceText =
-          _unit == "كيلو"
-              ? "الكيلو بـ ${_priceController.text.trim()}"
-              : "القطعة بـ ${_priceController.text.trim()}";
+      String priceText = _unit == "كيلو"
+          ? "الكيلو بـ ${_priceController.text.trim()}"
+          : "القطعة بـ ${_priceController.text.trim()}";
+
+      // 🔥 جلب آخر position موجود
+      final querySnapshot = await FirebaseFirestore.instance
+          .collection("branches")
+          .doc(widget.branchId)
+          .collection("menu")
+          .orderBy("position", descending: true)
+          .limit(1)
+          .get();
+
+      int newPosition = 0;
+      if (querySnapshot.docs.isNotEmpty) {
+        final lastDoc = querySnapshot.docs.first;
+        newPosition = (lastDoc["position"] ?? 0) + 1;
+      }
 
       // إضافة البيانات إلى Firestore
       await FirebaseFirestore.instance
@@ -66,12 +82,13 @@ class _AddItemPageState extends State<AddItemPage> {
           .doc(widget.branchId)
           .collection("menu")
           .add({
-        "name": _nameController.text.trim(),
-        "price": priceText,
-        "image": imageUrl ?? "", // إذا ما اختار صورة نخليها نص فاضي
-        "unit": _unit,
-        "createdAt": FieldValue.serverTimestamp(),
-      });
+            "name": _nameController.text.trim(),
+            "price": priceText,
+            "image": imageUrl ?? "", // إذا ما اختار صورة نخليها نص فاضي
+            "unit": _unit,
+            "createdAt": FieldValue.serverTimestamp(),
+            "position": newPosition, // ✅ إضافة position
+          });
 
       Navigator.pop(context); // رجوع بعد الإضافة
     } catch (e) {
@@ -156,7 +173,9 @@ class _AddItemPageState extends State<AddItemPage> {
                       color: Colors.grey[200],
                     ),
                     child: _imageFile == null
-                        ? const Center(child: Text("اضغط لاختيار صورة (اختياري)"))
+                        ? const Center(
+                            child: Text("اضغط لاختيار صورة (اختياري)"),
+                          )
                         : Image.file(_imageFile!, fit: BoxFit.cover),
                   ),
                 ),
