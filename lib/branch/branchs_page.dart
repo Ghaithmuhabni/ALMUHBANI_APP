@@ -155,6 +155,8 @@ class BranchesPage extends StatelessWidget {
                   'region': data['region'] ?? '',
                   'phone': data['phone'] ?? '',
                   'linelnad_phone': data['linelnad_phone'] ?? '',
+                  'latitude': data['latitude']?? '',
+                  'longitude': data['longitude']?? '',
                 },
               ),
             ),

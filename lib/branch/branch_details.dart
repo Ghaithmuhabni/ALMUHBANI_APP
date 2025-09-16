@@ -14,9 +14,9 @@ class BranchDetailsPage extends StatelessWidget {
   const BranchDetailsPage({required this.branch, Key? key}) : super(key: key);
 
   // دالة لفتح خرائط غوغل
-  Future<void> _openGoogleMaps() async {
-    const url =
-        'https://www.google.com/maps/search/?api=1&query=34.73309996612312,36.703286909408746';
+  Future<void> _openGoogleMaps(double latitude, double longitude) async {
+    final url =
+        'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude';
     if (await canLaunchUrl(Uri.parse(url))) {
       await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
     } else {
@@ -252,8 +252,11 @@ class BranchDetailsPage extends StatelessWidget {
                     const SizedBox(height: 16),
                     Row(
                       children: [
-                        const Icon(Icons.phone,
-                            color: Color(0xFF8B0000), size: 20),
+                        const Icon(
+                          Icons.phone,
+                          color: Color(0xFF8B0000),
+                          size: 20,
+                        ),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
@@ -278,8 +281,7 @@ class BranchDetailsPage extends StatelessWidget {
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(12),
                         color: Colors.white,
-                        border:
-                            Border.all(color: Color(0xFF8B0000), width: 2),
+                        border: Border.all(color: Color(0xFF8B0000), width: 2),
                         boxShadow: const [
                           BoxShadow(
                             color: Colors.black26,
@@ -293,19 +295,23 @@ class BranchDetailsPage extends StatelessWidget {
                           ClipRRect(
                             borderRadius: BorderRadius.circular(12),
                             child: GoogleMap(
-                              initialCameraPosition: const CameraPosition(
+                              initialCameraPosition: CameraPosition(
                                 target: LatLng(
-                                    34.73309996612312, 36.703286909408746),
+                                  branch['latitude'] ?? 0.0,
+                                  branch['longitude'] ?? 0.0,
+                                ),
                                 zoom: 15,
                               ),
                               markers: {
-                                const Marker(
-                                  markerId: MarkerId("branch"),
+                                Marker(
+                                  markerId: const MarkerId("branch"),
                                   position: LatLng(
-                                    34.73309996612312,
-                                    36.703286909408746,
+                                    branch['latitude'] ?? 0.0,
+                                    branch['longitude'] ?? 0.0,
                                   ),
-                                  infoWindow: InfoWindow(title: "فرعنا هنا"),
+                                  infoWindow: InfoWindow(
+                                    title: branch['name'] ?? '',
+                                  ),
                                 ),
                               },
                               zoomControlsEnabled: false,
@@ -316,7 +322,10 @@ class BranchDetailsPage extends StatelessWidget {
                             bottom: 8,
                             right: 8,
                             child: ElevatedButton.icon(
-                              onPressed: _openGoogleMaps,
+                              onPressed: () => _openGoogleMaps(
+                                branch['latitude'] ?? 0.0,
+                                branch['longitude'] ?? 0.0,
+                              ),
                               icon: const Icon(
                                 Icons.directions,
                                 size: 16,
@@ -341,6 +350,7 @@ class BranchDetailsPage extends StatelessWidget {
                         ],
                       ),
                     ),
+
                     const SizedBox(height: 24),
 
                     // القائمة + زر الإضافة إذا الأدمن مسجل دخول
@@ -395,8 +405,7 @@ class BranchDetailsPage extends StatelessWidget {
           padding: const EdgeInsets.all(12),
           decoration: const BoxDecoration(
             color: Colors.white,
-            border:
-                Border(top: BorderSide(color: Color(0xFF8B0000), width: 2)),
+            border: Border(top: BorderSide(color: Color(0xFF8B0000), width: 2)),
           ),
           child: Row(
             children: [
@@ -529,7 +538,8 @@ class BranchDetailsPage extends StatelessWidget {
                 ),
                 leading: ClipRRect(
                   borderRadius: BorderRadius.circular(12),
-                  child: data["image"] != null &&
+                  child:
+                      data["image"] != null &&
                           data["image"].toString().isNotEmpty
                       ? Image.network(
                           data["image"],
@@ -568,8 +578,10 @@ class BranchDetailsPage extends StatelessWidget {
                           builder: (context) => Wrap(
                             children: [
                               ListTile(
-                                leading: const Icon(Icons.edit,
-                                    color: Colors.blue),
+                                leading: const Icon(
+                                  Icons.edit,
+                                  color: Colors.blue,
+                                ),
                                 title: const Text("تعديل"),
                                 onTap: () {
                                   Navigator.pop(context);
@@ -577,8 +589,10 @@ class BranchDetailsPage extends StatelessWidget {
                                 },
                               ),
                               ListTile(
-                                leading: const Icon(Icons.delete,
-                                    color: Colors.red),
+                                leading: const Icon(
+                                  Icons.delete,
+                                  color: Colors.red,
+                                ),
                                 title: const Text("حذف"),
                                 onTap: () {
                                   Navigator.pop(context);
@@ -598,7 +612,6 @@ class BranchDetailsPage extends StatelessWidget {
     );
   }
 }
-
 
 // import 'package:flutter/material.dart';
 // // import 'package:url_launcher/url_launcher.dart';
