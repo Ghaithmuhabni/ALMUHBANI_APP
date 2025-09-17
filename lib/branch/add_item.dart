@@ -121,7 +121,7 @@ class _AddItemPageState extends State<AddItemPage> {
         appBar: AppBar(
           title: const Text(
             "إضافة صنف جديد",
-            style: TextStyle(fontFamily: "Amiri"),
+            style: TextStyle(fontFamily: "Amiri", color: Colors.white),
           ),
           backgroundColor: const Color(0xFF8B0000),
         ),
