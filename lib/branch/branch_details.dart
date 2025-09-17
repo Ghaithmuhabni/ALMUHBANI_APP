@@ -74,7 +74,6 @@ class BranchDetailsPage extends StatelessWidget {
               TextField(
                 controller: priceController,
                 decoration: const InputDecoration(labelText: "السعر"),
-                keyboardType: TextInputType.number,
               ),
             ],
           ),
@@ -468,7 +467,8 @@ class BranchDetailsPage extends StatelessWidget {
     );
   }
 
-  // ✅ جلب قائمة الطعام من Firestore مع ReorderableListView
+  // ✅ جلب قائمة الطعام من Firestore
+  // الآن Reorderable فقط اذا الأدمن مسجل دخول
   Widget _buildMenuItems(String branchId, User? user) {
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
@@ -493,122 +493,127 @@ class BranchDetailsPage extends StatelessWidget {
 
         final items = snapshot.data!.docs;
 
-        return ReorderableListView.builder(
-          itemCount: items.length,
-          onReorder: (oldIndex, newIndex) async {
-            if (newIndex > oldIndex) newIndex -= 1;
+        // ✅ إذا الأدمن مسجل دخول → ReorderableListView
+        if (user != null) {
+          return ReorderableListView.builder(
+            itemCount: items.length,
+            onReorder: (oldIndex, newIndex) async {
+              if (newIndex > oldIndex) newIndex -= 1;
 
-            final updatedItems = List.from(items);
-            final movedItem = updatedItems.removeAt(oldIndex);
-            updatedItems.insert(newIndex, movedItem);
+              final updatedItems = List.from(items);
+              final movedItem = updatedItems.removeAt(oldIndex);
+              updatedItems.insert(newIndex, movedItem);
 
-            // تحديث كل العناصر بالترتيب الجديد
-            for (int i = 0; i < updatedItems.length; i++) {
-              final doc = updatedItems[i];
-              await FirebaseFirestore.instance
-                  .collection("branches")
-                  .doc(branchId)
-                  .collection("menu")
-                  .doc(doc.id)
-                  .update({"position": i});
-            }
-          },
-          itemBuilder: (context, index) {
-            final doc = items[index];
-            final data = doc.data() as Map<String, dynamic>;
-            return Container(
-              key: ValueKey(doc.id),
-              margin: const EdgeInsets.symmetric(vertical: 8),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                border: Border.all(color: const Color(0xFF8B0000), width: 1.5),
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Colors.black12,
-                    blurRadius: 4,
-                    offset: Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: ListTile(
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
-                ),
-                leading: ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child:
-                      data["image"] != null &&
-                          data["image"].toString().isNotEmpty
-                      ? Image.network(
-                          data["image"],
-                          width: 100,
-                          height: 100,
-                          fit: BoxFit.cover,
-                        )
-                      : Image.asset(
-                          "images/logo1.png",
-                          width: 100,
-                          height: 100,
-                          fit: BoxFit.cover,
-                        ),
-                ),
-                title: Text(
-                  data["name"] ?? "",
-                  style: const TextStyle(
-                    fontFamily: 'Amiri',
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF8B0000),
-                  ),
-                ),
-                subtitle: Text(
-                  "${data["price"] ?? ""} ل.س",
-                  style: const TextStyle(
-                    fontFamily: 'Poppins',
-                    fontSize: 14,
-                    color: Colors.black87,
-                  ),
-                ),
-                onTap: user != null
-                    ? () {
-                        showModalBottomSheet(
-                          context: context,
-                          builder: (context) => Wrap(
-                            children: [
-                              ListTile(
-                                leading: const Icon(
-                                  Icons.edit,
-                                  color: Colors.blue,
-                                ),
-                                title: const Text("تعديل"),
-                                onTap: () {
-                                  Navigator.pop(context);
-                                  _editItem(context, branchId, doc.id, data);
-                                },
-                              ),
-                              ListTile(
-                                leading: const Icon(
-                                  Icons.delete,
-                                  color: Colors.red,
-                                ),
-                                title: const Text("حذف"),
-                                onTap: () {
-                                  Navigator.pop(context);
-                                  _deleteItem(context, branchId, doc.id);
-                                },
-                              ),
-                            ],
-                          ),
-                        );
-                      }
-                    : null,
-              ),
-            );
-          },
-        );
+              // تحديث كل العناصر بالترتيب الجديد
+              for (int i = 0; i < updatedItems.length; i++) {
+                final doc = updatedItems[i];
+                await FirebaseFirestore.instance
+                    .collection("branches")
+                    .doc(branchId)
+                    .collection("menu")
+                    .doc(doc.id)
+                    .update({"position": i});
+              }
+            },
+            itemBuilder: (context, index) {
+              return _buildMenuItemTile(context, items[index], branchId, user);
+            },
+          );
+        } else {
+          // ✅ إذا المستخدم عادي → قائمة ثابتة (بدون ترتيب)
+          return ListView.builder(
+            itemCount: items.length,
+            itemBuilder: (context, index) {
+              return _buildMenuItemTile(context, items[index], branchId, user);
+            },
+          );
+        }
       },
+    );
+  }
+
+  // ✅ ويدجت العنصر الواحد للقائمة
+  Widget _buildMenuItemTile(
+    BuildContext context,
+    QueryDocumentSnapshot doc,
+    String branchId,
+    User? user,
+  ) {
+    final data = doc.data() as Map<String, dynamic>;
+    return Container(
+      key: ValueKey(doc.id),
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: const Color(0xFF8B0000), width: 1.5),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: const [
+          BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2)),
+        ],
+      ),
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        leading: ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: data["image"] != null && data["image"].toString().isNotEmpty
+              ? Image.network(
+                  data["image"],
+                  width: 100,
+                  height: 100,
+                  fit: BoxFit.cover,
+                )
+              : Image.asset(
+                  "images/logo1.png",
+                  width: 100,
+                  height: 100,
+                  fit: BoxFit.cover,
+                ),
+        ),
+        title: Text(
+          data["name"] ?? "",
+          style: const TextStyle(
+            fontFamily: 'Amiri',
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF8B0000),
+          ),
+        ),
+        subtitle: Text(
+          "${data["price"] ?? ""} ل.س",
+          style: const TextStyle(
+            fontFamily: 'Poppins',
+            fontSize: 14,
+            color: Colors.black87,
+          ),
+        ),
+        onTap: user != null
+            ? () {
+                showModalBottomSheet(
+                  context: context,
+                  builder: (context) => Wrap(
+                    children: [
+                      ListTile(
+                        leading: const Icon(Icons.edit, color: Colors.blue),
+                        title: const Text("تعديل"),
+                        onTap: () {
+                          Navigator.pop(context);
+                          _editItem(context, branchId, doc.id, data);
+                        },
+                      ),
+                      ListTile(
+                        leading: const Icon(Icons.delete, color: Colors.red),
+                        title: const Text("حذف"),
+                        onTap: () {
+                          Navigator.pop(context);
+                          _deleteItem(context, branchId, doc.id);
+                        },
+                      ),
+                    ],
+                  ),
+                );
+              }
+            : null,
+      ),
     );
   }
 }

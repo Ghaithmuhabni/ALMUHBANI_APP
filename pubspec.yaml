@@ -42,6 +42,7 @@ dependencies:
   cloud_firestore: ^6.0.0
   firebase_storage: ^13.0.0
   image_picker: ^1.2.0
+  device_info_plus: ^12.1.0
 
 dev_dependencies:
   flutter_test:
@@ -50,7 +51,7 @@ dev_dependencies:
 flutter_launcher_icons:
   android: true
   ios: true
-  image_path: "images/logo1.png"
+  image_path: "images/logo3.png"
   min_sdk_android: 21
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
